@@ -2,86 +2,109 @@ create database training_mgt;
 
 USE training_mgt;
 
--- 1. Courses
-CREATE TABLE Courses (
-    course_id INT AUTO_INCREMENT PRIMARY KEY,
-    course_name VARCHAR(100) NOT NULL,
-    course_description TEXT
+-- USER Table
+CREATE TABLE USER (
+    User_id INT PRIMARY KEY AUTO_INCREMENT,
+    Password VARCHAR(45) NOT NULL,
+    Role VARCHAR(15) NOT NULL,
+    Name VARCHAR(45) NOT NULL,
+    Email VARCHAR(45) NOT NULL,
+    Phone_no VARCHAR(15),
+    Is_active BOOLEAN DEFAULT TRUE,
+    Start_date DATE NOT NULL,
+    Updated_At DATE NOT NULL
 );
 
--- 2. Topics
-CREATE TABLE Topics (
-    topic_id INT AUTO_INCREMENT PRIMARY KEY,
-    course_id INT NOT NULL,
-    topic_name VARCHAR(100) NOT NULL,
-    topic_description TEXT,
-    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+-- COURSE Table
+CREATE TABLE COURSE (
+    Course_id INT PRIMARY KEY AUTO_INCREMENT,
+    Course_name VARCHAR(45) NOT NULL
 );
 
--- 3. Batches
-CREATE TABLE Batches (
-    batch_id INT AUTO_INCREMENT PRIMARY KEY,
-    course_id INT NOT NULL,
-    batch_code VARCHAR(50) UNIQUE NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+-- TOPICS Table
+CREATE TABLE TOPICS (
+    Topic_id INT PRIMARY KEY AUTO_INCREMENT,
+    Topic_name VARCHAR(45),
+    Course_id INT,
+    FOREIGN KEY (Course_id) REFERENCES COURSE(Course_id)
 );
 
--- 4. Trainers
-CREATE TABLE Trainers (
-    trainer_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(20)
+-- BATCHES Table
+CREATE TABLE BATCHES (
+    Batch_id INT PRIMARY KEY AUTO_INCREMENT,
+    Start_date DATE,
+    End_date DATE,
+    Course_id INT,
+    Max_strength INT,
+    FOREIGN KEY (Course_id) REFERENCES COURSE(Course_id)
 );
 
--- 5. BatchTrainers (Many-to-Many: Batches ↔ Trainers)
-CREATE TABLE BatchTrainers (
-    batch_id INT NOT NULL,
-    trainer_id INT NOT NULL,
-    PRIMARY KEY (batch_id, trainer_id),
-    FOREIGN KEY (batch_id) REFERENCES Batches(batch_id),
-    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
+-- ASSIGNMENTS Table
+CREATE TABLE ASSIGNMENTS (
+    Assignment_id INT PRIMARY KEY AUTO_INCREMENT,
+    Title VARCHAR(45),
+    Description VARCHAR(45),
+    Topic_id INT,
+    Total_marks INT,
+    Cut_off_marks INT,
+    Created_At DATE NOT NULL,
+    Updated_At DATE NOT NULL,
+    FOREIGN KEY (Topic_id) REFERENCES TOPICS(Topic_id)
 );
 
--- 6. Candidates
-CREATE TABLE Candidates (
-    candidate_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(20)
+-- SUBMISSIONS Table
+CREATE TABLE SUBMISSIONS (
+    Submission_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_id INT,
+    Assignment_id INT,
+    Score INT,
+    Pass_status VARCHAR(4),
+    Submitted_date DATE,
+    Max_attempts INT,
+    No_of_attempts INT,
+    Updated_At DATE NOT NULL,
+    FOREIGN KEY (User_id) REFERENCES USER(User_id),
+    FOREIGN KEY (Assignment_id) REFERENCES ASSIGNMENTS(Assignment_id)
 );
 
--- 7. BatchCandidates (Many-to-Many: Batches ↔ Candidates with Status)
-CREATE TABLE BatchCandidates (
-    batch_candidate_id INT AUTO_INCREMENT PRIMARY KEY,
-    batch_id INT NOT NULL,
-    candidate_id INT NOT NULL,
-    status ENUM('In Progress', 'Completed', 'Terminated') DEFAULT 'In Progress',
-    FOREIGN KEY (batch_id) REFERENCES Batches(batch_id),
-    FOREIGN KEY (candidate_id) REFERENCES Candidates(candidate_id)
+-- USER_BATCH Table (Composite Key)
+CREATE TABLE USER_BATCH (
+    User_id INT,
+    Batch_id INT,
+    Status VARCHAR(15),
+    Updated_At DATE NOT NULL,
+    PRIMARY KEY (User_id, Batch_id),
+    FOREIGN KEY (User_id) REFERENCES USER(User_id),
+    FOREIGN KEY (Batch_id) REFERENCES BATCHES(Batch_id)
 );
 
--- 8. Assignments
-CREATE TABLE Assignments (
-    assignment_id INT AUTO_INCREMENT PRIMARY KEY,
-    batch_id INT NOT NULL,
-    topic_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    due_date DATE NOT NULL,
-    FOREIGN KEY (batch_id) REFERENCES Batches(batch_id),
-    FOREIGN KEY (topic_id) REFERENCES Topics(topic_id)
+-- BATCH_ASSIGNMENT Table (Junction Table)
+CREATE TABLE BATCH_ASSIGNMENT (
+    Batch_code INT,
+    Assignment_id INT,
+    Due_Date DATE,
+    Updated_At DATE NOT NULL,
+    Updated_By INT,
+    PRIMARY KEY (Batch_code, Assignment_id),
+    FOREIGN KEY (Batch_code) REFERENCES BATCHES(Batch_id),
+    FOREIGN KEY (Assignment_id) REFERENCES ASSIGNMENTS(Assignment_id),
+    FOREIGN KEY (Updated_By) REFERENCES USER(User_id)
 );
 
--- 9. Submissions
-CREATE TABLE Submissions (
-    submission_id INT AUTO_INCREMENT PRIMARY KEY,
-    assignment_id INT NOT NULL,
-    batch_candidate_id INT NOT NULL,
-    submission_date DATE,
-    score DECIMAL(5,2),
-    FOREIGN KEY (assignment_id) REFERENCES Assignments(assignment_id),
-    FOREIGN KEY (batch_candidate_id) REFERENCES BatchCandidates(batch_candidate_id)
+-- TRAINER_TOPIC Table (Junction Table)
+CREATE TABLE TRAINER_TOPIC (
+    Topic_id INT,
+    User_id INT,
+    PRIMARY KEY (Topic_id, User_id),
+    FOREIGN KEY (Topic_id) REFERENCES TOPICS(Topic_id),
+    FOREIGN KEY (User_id) REFERENCES USER(User_id)
+);
+
+-- EXIT_DETAILS Table
+CREATE TABLE EXIT_DETAILS (
+    Exit_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_id INT,
+    Exit_date DATE NOT NULL,
+    Reason TEXT,
+    FOREIGN KEY (User_id) REFERENCES USER(User_id)
 );
