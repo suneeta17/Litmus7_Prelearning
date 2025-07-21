@@ -1,0 +1,17 @@
+# Ignore compiled Java class files
+*.class
+
+# Ignore bin and build directories
+/bin/
+
+# Ignore Eclipse project files
+.classpath
+.project
+.settings/
+
+# Ignore VS Code settings (if used)
+.vscode/
+
+# Ignore logs or temp files
+*.log
+*.tmp
