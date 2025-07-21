@@ -21,7 +21,7 @@ public class EmployeeDBService  {
 		
 		String url = "jdbc:mysql://localhost:3306/emp_mgt_sys";
 		String username = "root";
-	    String pwd = "Suneeta@123";
+	    	String pwd = "Enter your root password";
 		
 		//register driver
 		Class.forName("com.mysql.cj.jdbc.Driver");	
