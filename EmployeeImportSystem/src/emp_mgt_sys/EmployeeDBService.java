@@ -11,6 +11,10 @@ import java.sql.Statement;
 
 
 public class EmployeeDBService  {
+
+	private static String url = "jdbc:mysql://localhost:3306/emp_mgt_sys";
+	private static String username = "root";
+        private static String pwd = "Your Password";
 	
 	private Connection conn;
 	private Statement st;
@@ -19,10 +23,7 @@ public class EmployeeDBService  {
 	//Constructor that implements db connection
 	public EmployeeDBService() throws Exception{
 		
-		String url = "jdbc:mysql://localhost:3306/emp_mgt_sys";
-		String username = "root";
-	    	String pwd = "Enter your root password";
-		
+	
 		//register driver
 		Class.forName("com.mysql.cj.jdbc.Driver");	
 	
