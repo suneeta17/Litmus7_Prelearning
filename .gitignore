@@ -15,3 +15,6 @@
 # Ignore logs or temp files
 *.log
 *.tmp
+/.metadata/
+
+EmployeeImportSystem/.metadata/

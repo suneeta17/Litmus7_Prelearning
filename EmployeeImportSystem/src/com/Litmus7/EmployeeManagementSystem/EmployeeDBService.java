@@ -1,4 +1,4 @@
-package emp_mgt_sys;
+package com.Litmus7.EmployeeManagementSystem;
 
 
 import java.sql.Connection;
@@ -16,14 +16,21 @@ public class EmployeeDBService  {
 	private static String username = "root";
         private static String pwd = "Your Password";
 	
-	private Connection conn;
+    
+    private Connection conn;
 	private Statement st;
 	private PreparedStatement pstmt;
+	
 	
 	//Constructor that implements db connection
 	public EmployeeDBService() throws Exception{
 		
+<<<<<<< HEAD:EmployeeImportSystem/src/emp_mgt_sys/EmployeeDBService.java
 	
+=======
+		
+		
+>>>>>>> f8192d0 (updated code):EmployeeImportSystem/src/com/Litmus7/EmployeeManagementSystem/EmployeeDBService.java
 		//register driver
 		Class.forName("com.mysql.cj.jdbc.Driver");	
 	
@@ -47,6 +54,11 @@ public class EmployeeDBService  {
 		
 	}
 	
+	//getter
+	public Connection getConn() {
+		return conn;
+	}
+	
 	//To check Employee exist or not
 	public boolean isEmployeeIDExist(String empId) throws SQLException {
 		boolean exists = false;
@@ -63,39 +75,7 @@ public class EmployeeDBService  {
 		
 	}
 	
-	//To insert Employee data into database
-	public void insertEmployee(String[] values) throws SQLException {
-		
-		String empId = values[0].trim();
-        String firstName = values[1].trim();
-        String lastName = values[2].trim();
-        String email = values[3].trim();
-        String phone = values[4].trim();
-        String department = values[5].trim();
-        String salary = values[6].trim();
-        String joinDate = values[7].trim();
-		
-        Date date =Validator.isDateValid(joinDate);
-        
-        String sql = "INSERT INTO employees (emp_id, first_name, last_name, email, phone, department, salary, join_date) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-        pstmt = conn.prepareStatement(sql);
-	
-	    pstmt.setString(1, empId);
-	    pstmt.setString(2, firstName);
-	    pstmt.setString(3, lastName);
-	    pstmt.setString(4, email);
-	    pstmt.setString(5, phone);
-	    pstmt.setString(6, department);
-	    pstmt.setDouble(7, Double.parseDouble(salary));
-	    pstmt.setDate(8, date);
-	
-	    int rowsInserted = pstmt.executeUpdate();
-	    if (rowsInserted > 0) {
-	       System.out.println("Employee inserted: " + empId);
-	    }
 	
 	}	
-  }
+  
 	
