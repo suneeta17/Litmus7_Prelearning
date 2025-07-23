@@ -14,7 +14,7 @@ public class EmployeeDBService  {
 
 	private static String url = "jdbc:mysql://localhost:3306/emp_mgt_sys";
 	private static String username = "root";
-        private static String pwd = "Your Password";
+        private static String pwd = "Your passoword";
 	
     
     private Connection conn;
@@ -25,12 +25,7 @@ public class EmployeeDBService  {
 	//Constructor that implements db connection
 	public EmployeeDBService() throws Exception{
 		
-<<<<<<< HEAD:EmployeeImportSystem/src/emp_mgt_sys/EmployeeDBService.java
-	
-=======
-		
-		
->>>>>>> f8192d0 (updated code):EmployeeImportSystem/src/com/Litmus7/EmployeeManagementSystem/EmployeeDBService.java
+
 		//register driver
 		Class.forName("com.mysql.cj.jdbc.Driver");	
 	
@@ -38,19 +33,6 @@ public class EmployeeDBService  {
 		conn = DriverManager.getConnection(url,username,pwd);
 		st = conn.createStatement();
 	
-		
-		String query = "CREATE TABLE IF NOT EXISTS employees (\r\n"
-				+ "    emp_id VARCHAR(20) PRIMARY KEY,\r\n"
-				+ "    first_name VARCHAR(50),\r\n"
-				+ "    last_name VARCHAR(50),\r\n"
-				+ "    email VARCHAR(100) UNIQUE,\r\n"
-				+ "    phone VARCHAR(20) UNIQUE,\r\n"
-				+ "    department VARCHAR(50),\r\n"
-				+ "    salary DECIMAL(10, 2),\r\n"
-				+ "    join_date DATE\r\n"
-				+ ");\r\n"
-				+ "";
-		st.executeUpdate(query);
 		
 	}
 	

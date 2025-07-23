@@ -8,10 +8,7 @@ import java.text.SimpleDateFormat;
 public class ValidationUtility {
 	
 	public static boolean valid = false;
-	final static String DATE_FORMAT = "dd-MM-yyyy";
-	
-		
-	
+
 	
 	//Checks whether parameter is empty or null
 	public static boolean isNotNullorNotEmpty(String Value) {
@@ -48,6 +45,7 @@ public class ValidationUtility {
 	
 	//Checks whether the data is valid
 	public static java.sql.Date isDateValid(String date) {
+		final String DATE_FORMAT = "dd-MM-yyyy";
 		try {
 		DateFormat df = new SimpleDateFormat(DATE_FORMAT);
 		df.setLenient(false);
