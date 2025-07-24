@@ -3,15 +3,19 @@ package com.Litmus7.EmployeeManagementSystem;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
-        EmployeeManagerController controller = new EmployeeManagerController();
-        String filePath = "C:\\Users\\sunee\\OneDrive\\Documents\\LITMUS LEARNING\\Java\\employee_data.csv"; // Change this to your actual file path
-
-        List<Response<String>> results = controller.readCSV(filePath);
-
-        System.out.println("\n--- Import Summary ---");
-        for (Response<String> res : results) {
-            System.out.println("Status: " + res.getStatusCode() + " | Success: " + res.isSuccess() + " | Message: " + res.getMessage());
-        }
-    }
+	public static void main(String[] args) {
+	    EmployeeManagerController controller = new EmployeeManagerController();
+	    
+	    String filePath ="\\C:\\Users\\sunee\\OneDrive\\Documents\\LITMUS LEARNING\\\\Java\\employee_data.csv";
+	    try {
+	        controller.readCSV(filePath, response -> {
+	            // Handle each response immediately as it's produced
+	            System.out.println("Status: " + response.getStatusCode() + " | " + response.getMessage());
+	        });
+	    } catch (IllegalArgumentException e) {
+	        System.out.println("Error: " + e.getMessage());
+	    } catch (Exception e) {
+	        System.out.println("Unexpected Error: " + e.getMessage());
+	    }
+	}
 }

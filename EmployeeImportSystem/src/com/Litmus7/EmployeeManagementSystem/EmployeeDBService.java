@@ -14,12 +14,11 @@ public class EmployeeDBService  {
 
 	private static String url = "jdbc:mysql://localhost:3306/emp_mgt_sys";
 	private static String username = "root";
-        private static String pwd = "Your passoword";
+    private static String pwd = "Suneeta@123";
 	
     
     private Connection conn;
-	private Statement st;
-	private PreparedStatement pstmt;
+	
 	
 	
 	//Constructor that implements db connection
@@ -31,7 +30,7 @@ public class EmployeeDBService  {
 	
 		//Establish a connection
 		conn = DriverManager.getConnection(url,username,pwd);
-		st = conn.createStatement();
+
 	
 		
 	}

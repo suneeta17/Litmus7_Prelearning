@@ -6,43 +6,50 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class EmployeeManagerController {
 
-    public List<Response<String>> readCSV(String filePath) {
-        List<Response<String>> responses = new ArrayList<>();
+    //Read CSV line by line
+    public void readCSV(String filePath, Consumer<Response<String>> responseHandler) throws Exception {
+        // Fail fast for incorrect file type
+        if (!ValidationUtility.isCSVFile(filePath)) {
+            throw new IllegalArgumentException("Incorrect File Type: " + filePath);
+        }
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
-            br.readLine(); // Skip header line
+            br.readLine(); // Skip header
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
 
                 if (values.length != 8) {
-                    responses.add(new Response<>(false, 422, "Incorrect number of fields. Skipping line: " + line));
+                    responseHandler.accept(new Response<>(false, 422,
+                            "Incorrect number of fields. Skipping line: " + line));
                     continue;
                 }
 
                 Employee emp = new Employee(values);
 
+                // Validate employee data
                 Response<String> validationResult = validateEmployeeData(emp);
                 if (!validationResult.isSuccess()) {
-                    responses.add(validationResult);
+                    responseHandler.accept(validationResult);
                     continue;
                 }
 
+                // Insert into DB
                 Response<String> dbResult = writeEmployeeToDatabase(emp);
-                responses.add(dbResult);
+                responseHandler.accept(dbResult);
             }
 
         } catch (Exception e) {
-            responses.add(new Response<>(false, 500, "Error reading CSV: " + e.getMessage()));
+            responseHandler.accept(new Response<>(false, 500, "Error reading CSV: " + e.getMessage()));
         }
-
-        return responses;
     }
 
+    // Validate employee data
     private Response<String> validateEmployeeData(Employee emp) throws Exception {
         List<String> missingFields = new ArrayList<>();
         EmployeeDBService db = new EmployeeDBService();
@@ -51,13 +58,14 @@ public class EmployeeManagerController {
         if (!ValidationUtility.isNotNullorNotEmpty(emp.getLastName())) missingFields.add("lastName");
         if (!ValidationUtility.isNotNullorNotEmpty(emp.getEmail())) missingFields.add("email");
         if (!ValidationUtility.isNotNullorNotEmpty(emp.getPhone())) missingFields.add("phone");
-        
+
         if (db.isEmployeeIDExist(emp.getEmpId())) {
             return new Response<>(false, 409, "Employee with ID already exists: " + emp.getEmpId());
         }
 
         if (!missingFields.isEmpty()) {
-            return new Response<>(false, 422, "Validation failed. Missing fields: " + String.join(", ", missingFields));
+            return new Response<>(false, 422,
+                    "Validation failed. Missing fields: " + String.join(", ", missingFields));
         }
 
         if (!ValidationUtility.isEmailValid(emp.getEmail())) {
@@ -68,11 +76,10 @@ public class EmployeeManagerController {
             return new Response<>(false, 400, "Invalid phone number for: " + emp.getPhone());
         }
 
-        
-
-        return new Response<>(true, 200, "Validation passed.");
+        return new Response<>(true, 200, "Validation passed for employee: " + emp.getEmpId());
     }
 
+    // Insert employee into database
     private Response<String> writeEmployeeToDatabase(Employee emp) throws Exception {
         EmployeeDBService db = new EmployeeDBService();
 
