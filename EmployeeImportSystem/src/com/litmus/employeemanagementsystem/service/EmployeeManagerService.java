@@ -16,38 +16,30 @@ public class EmployeeManagerService {
 
     private EmployeeDAO employeeDAO = new EmployeeDAO();
 
-    // Full flow: CSV check → read → validate → insert
+    
     public Response<String> importEmployeeDataToDB(String filePath) {
         if (ValidationUtility.isCSVFile(filePath)) {
             return new Response<>(400, "Invalid file type. Please provide a CSV file.");
         }
 
+        List<String[]> csvData;
+        try {
+            csvData = loadCSVData(filePath);
+        } catch (IOException e) {
+            return new Response<>(500, "Failed to read file: " + e.getMessage());
+        }
+
         List<Employee> validEmployees = new ArrayList<>();
         int skippedCount = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            boolean isFirstLine = true;
-
-            while ((line = br.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
-
-                String[] empData = line.split(",");
-
-                Response<Employee> validationResult = validateEmployeeData(empData);
-                if (validationResult.getStatusCode() != 200) {
-                    System.out.println("Validation failed for line: " + line + " | Reason: " + validationResult.getMessage());
-                    skippedCount++;
-                    continue;
-                }
-
+        for (String[] empData : csvData) {
+            Response<Employee> validationResult = validateEmployeeData(empData);
+            if (validationResult.getStatusCode() != 200) {
+                System.out.println("Validation failed: " + String.join(",", empData) + " | Reason: " + validationResult.getMessage());
+                skippedCount++;
+            } else {
                 validEmployees.add(validationResult.getData());
             }
-        } catch (IOException e) {
-            return new Response<>(500, "Failed to read file: " + e.getMessage());
         }
 
         int insertedCount = 0;
@@ -67,6 +59,29 @@ public class EmployeeManagerService {
 
         return new Response<>(200, "Import complete. Inserted: " + insertedCount + ", Skipped: " + skippedCount);
     }
+
+    
+    private List<String[]> loadCSVData(String filePath) throws IOException {
+        List<String[]> records = new ArrayList<>();
+
+        try (FileReader fr = new FileReader(filePath);
+             BufferedReader br = new BufferedReader(fr)) {
+
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // Skip header
+                }
+                String[] fields = line.split(",");
+                records.add(fields);
+            }
+        }
+        return records;
+    }
+
 
     // Validates a single employee entry
     private Response<Employee> validateEmployeeData(String[] empData) {
