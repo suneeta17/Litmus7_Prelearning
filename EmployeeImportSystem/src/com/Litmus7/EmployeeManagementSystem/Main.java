@@ -1,6 +1,5 @@
 package com.Litmus7.EmployeeManagementSystem;
 
-import java.util.List;
 
 public class Main {
 	public static void main(String[] args) {
@@ -10,7 +9,7 @@ public class Main {
 	    try {
 	        controller.readCSV(filePath, response -> {
 	            // Handle each response immediately as it's produced
-	            System.out.println("Status: " + response.getStatusCode() + " | " + response.getMessage());
+	            System.out.println("Status: " + response.getStatusCode() + " | " + response.getMessage() + "- " + response.getData());
 	        });
 	    } catch (IllegalArgumentException e) {
 	        System.out.println("Error: " + e.getMessage());

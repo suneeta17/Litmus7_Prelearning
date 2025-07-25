@@ -2,12 +2,10 @@ package com.Litmus7.EmployeeManagementSystem;
 
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 
 public class EmployeeDBService  {
@@ -19,20 +17,14 @@ public class EmployeeDBService  {
     
     private Connection conn;
 	
-	
-	
 	//Constructor that implements db connection
 	public EmployeeDBService() throws Exception{
-		
-
 		//register driver
 		Class.forName("com.mysql.cj.jdbc.Driver");	
 	
 		//Establish a connection
 		conn = DriverManager.getConnection(url,username,pwd);
-
 	
-		
 	}
 	
 	//getter

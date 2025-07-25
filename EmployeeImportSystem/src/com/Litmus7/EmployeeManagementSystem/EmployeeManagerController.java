@@ -45,7 +45,7 @@ public class EmployeeManagerController {
             }
 
         } catch (Exception e) {
-            responseHandler.accept(new Response<>(false, 500, "Error reading CSV: " + e.getMessage()));
+            responseHandler.accept(new Response<>(false, 500, "Error reading CSV: " , e.getMessage()));
         }
     }
 
@@ -60,7 +60,7 @@ public class EmployeeManagerController {
         if (!ValidationUtility.isNotNullorNotEmpty(emp.getPhone())) missingFields.add("phone");
 
         if (db.isEmployeeIDExist(emp.getEmpId())) {
-            return new Response<>(false, 409, "Employee with ID already exists: " + emp.getEmpId());
+            return new Response<>(false, 409, "Employee with ID already exists: " , emp.getEmpId());
         }
 
         if (!missingFields.isEmpty()) {
@@ -69,14 +69,14 @@ public class EmployeeManagerController {
         }
 
         if (!ValidationUtility.isEmailValid(emp.getEmail())) {
-            return new Response<>(false, 400, "Invalid email format for: " + emp.getEmail());
+            return new Response<>(false, 400, "Invalid email format for: " , emp.getEmail());
         }
 
         if (!ValidationUtility.isPhoneNumberValid(emp.getPhone())) {
-            return new Response<>(false, 400, "Invalid phone number for: " + emp.getPhone());
+            return new Response<>(false, 400, "Invalid phone number for: " , emp.getPhone());
         }
 
-        return new Response<>(true, 200, "Validation passed for employee: " + emp.getEmpId());
+        return new Response<>(true, 200, "Validation passed for employee: " , emp.getEmpId());
     }
 
     // Insert employee into database
@@ -98,12 +98,12 @@ public class EmployeeManagerController {
 
             int rowsInserted = pstmt.executeUpdate();
             if (rowsInserted > 0) {
-                return new Response<>(true, 200, "Employee inserted successfully: " + emp.getEmpId());
+                return new Response<>(true, 200, "Employee inserted successfully: " , emp.getEmpId());
             } else {
-                return new Response<>(false, 500, "Failed to insert employee: " + emp.getEmpId());
+                return new Response<>(false, 500, "Failed to insert employee: " , emp.getEmpId());
             }
         } catch (Exception e) {
-            return new Response<>(false, 500, "Database error: " + e.getMessage() + " for employee: " + emp.getEmpId());
+            return new Response<>(false, 500, "Database error: " + e.getMessage() + " for employee: " , emp.getEmpId());
         }
     }
 }
