@@ -1,6 +1,9 @@
-package com.Litmus7.EmployeeManagementSystem;
+package com.litmus.employeemanagementsystem.dto;
 
 import java.sql.Date;
+import java.text.ParseException;
+
+import com.litmus.employeemanagementsystem.util.ValidationUtility;
 
 
 public class Employee {
@@ -14,7 +17,7 @@ public class Employee {
     private double salary;
     private Date joinDate;
 	
-	public Employee(String[] empData) {
+	public Employee(String[] empData) throws ParseException {
 		
 		 empId = empData[0];
 		 firstName = empData[1];
