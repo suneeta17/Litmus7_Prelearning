@@ -16,7 +16,7 @@ public class EmployeeManagerService {
 
     private EmployeeDAO employeeDAO = new EmployeeDAO();
 
-    
+    // Full flow: CSV check → read → validate → insert
     public Response<String> importEmployeeDataToDB(String filePath) {
         if (ValidationUtility.isCSVFile(filePath)) {
             return new Response<>(400, "Invalid file type. Please provide a CSV file.");
@@ -101,7 +101,7 @@ public class EmployeeManagerService {
             if (ValidationUtility.isPhoneNumberValid(phone)) {
                 return new Response<>(400, "Invalid phone number: " + phone);
             }
-            if (!ValidationUtility.isDoubleValid(salary)) {
+            if (ValidationUtility.isDoubleValid(salary)) {
                 return new Response<>(400, "Invalid salary: " + salary);
             }
             if (ValidationUtility.isDateValid(joinDate) == null) {
