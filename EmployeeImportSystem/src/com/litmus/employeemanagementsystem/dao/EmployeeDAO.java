@@ -2,12 +2,11 @@ package com.litmus.employeemanagementsystem.dao;
 
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
+import com.litmus.employeemanagementsystem.CONSTANTS.SQLConstants;
 import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.util.DBConnection;
 
@@ -16,11 +15,9 @@ public class EmployeeDAO  {
 	
 	//To add employee data to db
 	public boolean addEmployee(Employee emp) throws SQLException {
-		String sql = "INSERT INTO employees (emp_id, first_name, last_name, email, phone, department, salary, join_date) " +
-	             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		Connection conn = DBConnection.getConnection();
-		PreparedStatement pst = conn.prepareStatement(sql);
+		PreparedStatement pst = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);
 		
 		pst.setString(1, emp.getEmpId());
 	    pst.setString(2, emp.getFirstName());
@@ -41,7 +38,7 @@ public class EmployeeDAO  {
 	public boolean isEmployeeIDExist(String empId) throws SQLException {
 		
 		Connection conn = DBConnection.getConnection();
-		PreparedStatement pst = conn.prepareStatement("Select emp_id from employees where emp_id = ?");
+		PreparedStatement pst = conn.prepareStatement(SQLConstants.CHECK_EMPLOYEE_ID_EXISTS);
 		pst.setString(1,empId);
 		ResultSet rs = pst.executeQuery();
 		

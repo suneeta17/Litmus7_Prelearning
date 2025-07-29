@@ -6,14 +6,15 @@ import java.text.SimpleDateFormat;
 
 public class ValidationUtility {
 	
+	
 	//Checks whether parameter is empty or null
 	public static boolean isNotNullOrNotEmpty(String value) {
-		return value != null && value.trim().isEmpty();
+		return value != null && !value.trim().isEmpty();
 	}
 	
 	//Checks whether FileType is CSV
 	public static boolean isCSVFile(String filePath) {
-		return isNotNullOrNotEmpty(filePath) && filePath.toLowerCase().endsWith(".csv");
+		return !isNotNullOrNotEmpty(filePath) && filePath.toLowerCase().endsWith(".csv");
 		
 	}
 	

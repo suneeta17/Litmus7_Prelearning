@@ -4,63 +4,63 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.litmus.employeemanagementsystem.dao.EmployeeDAO;
 import com.litmus.employeemanagementsystem.dto.Employee;
-import com.litmus.employeemanagementsystem.dto.Response;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
+
 
 public class EmployeeManagerService {
 
-    private EmployeeDAO employeeDAO = new EmployeeDAO();
+    //Method to import data from  csv to database
+    public Map<String, List<String>> importEmployeeDataToDB(String filePath) throws ParseException, IOException, SQLException {
+    	EmployeeDAO employeeDAO = new EmployeeDAO();
+        Map<String, List<String>> result = new HashMap<>();
+        result.put("success", new ArrayList<>());
+        result.put("error", new ArrayList<>());
 
-    // Full flow: CSV check → read → validate → insert
-    public Response<String> importEmployeeDataToDB(String filePath) {
         if (ValidationUtility.isCSVFile(filePath)) {
-            return new Response<>(400, "Invalid file type. Please provide a CSV file.");
+            result.get("error").add("Invalid file type. Please provide a CSV file.");
+            return result;
         }
 
         List<String[]> csvData;
-        try {
-            csvData = loadCSVData(filePath);
-        } catch (IOException e) {
-            return new Response<>(500, "Failed to read file: " + e.getMessage());
-        }
+        csvData = loadCSVData(filePath);
+        
 
         List<Employee> validEmployees = new ArrayList<>();
-        int skippedCount = 0;
 
         for (String[] empData : csvData) {
-            Response<Employee> validationResult = validateEmployeeData(empData);
-            if (validationResult.getStatusCode() != 200) {
-                System.out.println("Validation failed: " + String.join(",", empData) + " | Reason: " + validationResult.getMessage());
-                skippedCount++;
+            String validationError = validateEmployeeData(empData);
+            if (validationError != null) {
+                result.get("error").add("Validation failed: " + String.join(",", empData) + " | Reason: " + validationError);
             } else {
-                validEmployees.add(validationResult.getData());
+                validEmployees.add(new Employee(empData));
             }
         }
 
-        int insertedCount = 0;
         for (Employee emp : validEmployees) {
-            try {
-                if (!employeeDAO.isEmployeeIDExist(emp.getEmpId())) {
-                    if (employeeDAO.addEmployee(emp)) {
-                        insertedCount++;
-                    }
+           
+            if (!employeeDAO.isEmployeeIDExist(emp.getEmpId())) {
+                if (employeeDAO.addEmployee(emp)) {
+                    result.get("success").add("Inserted employee ID: " + emp.getEmpId());
                 } else {
-                    System.out.println("Duplicate Employee ID skipped: " + emp.getEmpId());
+                    result.get("error").add("Failed to insert employee ID: " + emp.getEmpId());
                 }
-            } catch (SQLException e) {
-                System.out.println("DB Error for employee " + emp.getEmpId() + ": " + e.getMessage());
-            }
+            } else {
+                result.get("error").add("Duplicate Employee ID skipped: " + emp.getEmpId());
+            	}
+            
         }
-
-        return new Response<>(200, "Import complete. Inserted: " + insertedCount + ", Skipped: " + skippedCount);
+        return result;
     }
-
-    
+        
+    // Method to load the data from csv
     private List<String[]> loadCSVData(String filePath) throws IOException {
         List<String[]> records = new ArrayList<>();
 
@@ -82,12 +82,24 @@ public class EmployeeManagerService {
         return records;
     }
 
-
-    // Validates a single employee entry
-    private Response<Employee> validateEmployeeData(String[] empData) {
+    // Method to  validate data
+    private String validateEmployeeData(String[] empData) {
+    	
+    	String[] fieldNames = {
+    		    "Employee ID", "First Name", "Last Name", "Email",
+    		    "Phone", "Department", "Salary", "Join Date"
+    		};
+    	
         if (empData.length != 8) {
-            return new Response<>(400, "Invalid number of fields (expected 8, got " + empData.length + ")");
+            return "Invalid number of fields (expected 8, got " + empData.length + ")";
         }
+        
+        for (int i = 0; i < empData.length; i++) {
+            if (!ValidationUtility.isNotNullOrNotEmpty(empData[i])) {
+                return  fieldNames[i] + " is empty or null.";
+            }
+        }
+
 
         try {
             String email = empData[3];
@@ -96,23 +108,21 @@ public class EmployeeManagerService {
             String joinDate = empData[7];
 
             if (!ValidationUtility.isEmailValid(email)) {
-                return new Response<>(400, "Invalid email: " + email);
+                return "Invalid email: " + email;
             }
             if (ValidationUtility.isPhoneNumberValid(phone)) {
-                return new Response<>(400, "Invalid phone number: " + phone);
+                return "Invalid phone number: " + phone;
             }
-            if (ValidationUtility.isDoubleValid(salary)) {
-                return new Response<>(400, "Invalid salary: " + salary);
+            if (!ValidationUtility.isDoubleValid(salary)) {
+                return "Invalid salary: " + salary;
             }
             if (ValidationUtility.isDateValid(joinDate) == null) {
-                return new Response<>(400, "Invalid join date: " + joinDate);
+                return "Invalid join date: " + joinDate;
             }
 
-            Employee emp = new Employee(empData);
-            return new Response<>(200, "Valid", emp);
-
+            return null; // No error
         } catch (Exception e) {
-            return new Response<>(500, "Validation exception: " + e.getMessage());
+            return "Validation exception: " + e.getMessage();
         }
     }
 }
