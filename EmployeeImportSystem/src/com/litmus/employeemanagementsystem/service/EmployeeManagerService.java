@@ -1,25 +1,21 @@
 package com.litmus.employeemanagementsystem.service;
 
+import com.litmus.employeemanagementsystem.dao.EmployeeDAO;
+import com.litmus.employeemanagementsystem.dto.Employee;
+import com.litmus.employeemanagementsystem.util.ValidationUtility;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.litmus.employeemanagementsystem.dao.EmployeeDAO;
-import com.litmus.employeemanagementsystem.dto.Employee;
-import com.litmus.employeemanagementsystem.util.ValidationUtility;
-
+import java.util.*;
 
 public class EmployeeManagerService {
-
-    //Method to import data from  csv to database
+	
+	//Method to import employee data to database
     public Map<String, List<String>> importEmployeeDataToDB(String filePath) throws ParseException, IOException, SQLException {
-    	EmployeeDAO employeeDAO = new EmployeeDAO();
+        EmployeeDAO dao = new EmployeeDAO();
         Map<String, List<String>> result = new HashMap<>();
         result.put("success", new ArrayList<>());
         result.put("error", new ArrayList<>());
@@ -29,100 +25,62 @@ public class EmployeeManagerService {
             return result;
         }
 
-        List<String[]> csvData;
-        csvData = loadCSVData(filePath);
-        
-
+        List<String[]> rows = loadCSV(filePath);
         List<Employee> validEmployees = new ArrayList<>();
 
-        for (String[] empData : csvData) {
-            String validationError = validateEmployeeData(empData);
-            if (validationError != null) {
-                result.get("error").add("Validation failed: " + String.join(",", empData) + " | Reason: " + validationError);
+        for (String[] row : rows) {
+            String error = validate(row);
+            if (error != null) {
+                result.get("error").add("Invalid: " + Arrays.toString(row) + " | Reason: " + error);
             } else {
-                validEmployees.add(new Employee(empData));
+                validEmployees.add(new Employee(row));
             }
         }
 
         for (Employee emp : validEmployees) {
-           
-            if (!employeeDAO.isEmployeeIDExist(emp.getEmpId())) {
-                if (employeeDAO.addEmployee(emp)) {
-                    result.get("success").add("Inserted employee ID: " + emp.getEmpId());
-                } else {
-                    result.get("error").add("Failed to insert employee ID: " + emp.getEmpId());
-                }
+            String empId = emp.getEmpId();
+            if (dao.isEmployeeIDExist(empId)) {
+                result.get("error").add("Duplicate Employee ID: " + empId);
+            } else if (dao.addEmployee(emp)) {
+                result.get("success").add("Inserted: " + empId);
             } else {
-                result.get("error").add("Duplicate Employee ID skipped: " + emp.getEmpId());
-            	}
-            
+                result.get("error").add("Failed to insert: " + empId);
+            }
         }
+
         return result;
     }
-        
-    // Method to load the data from csv
-    private List<String[]> loadCSVData(String filePath) throws IOException {
-        List<String[]> records = new ArrayList<>();
 
-        try (FileReader fr = new FileReader(filePath);
-             BufferedReader br = new BufferedReader(fr)) {
-
+    //Method to load employee data from csv file
+    private List<String[]> loadCSV(String path) throws IOException {
+        List<String[]> data = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            br.readLine(); // skip header
             String line;
-            boolean isFirstLine = true;
-
             while ((line = br.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue; // Skip header
-                }
-                String[] fields = line.split(",");
-                records.add(fields);
+                data.add(line.split(","));
             }
         }
-        return records;
+        return data;
     }
 
-    // Method to  validate data
-    private String validateEmployeeData(String[] empData) {
-    	
-    	String[] fieldNames = {
-    		    "Employee ID", "First Name", "Last Name", "Email",
-    		    "Phone", "Department", "Salary", "Join Date"
-    		};
-    	
-        if (empData.length != 8) {
-            return "Invalid number of fields (expected 8, got " + empData.length + ")";
-        }
-        
-        for (int i = 0; i < empData.length; i++) {
-            if (!ValidationUtility.isNotNullOrNotEmpty(empData[i])) {
-                return  fieldNames[i] + " is empty or null.";
+    //Method to validate employee record
+    private String validate(String[] data) throws ParseException {
+        String[] fields = {"Employee ID", "First Name", "Last Name", "Email", "Phone", "Department", "Salary", "Join Date"};
+        if (data.length != fields.length) return "Expected " + fields.length + " fields, got " + data.length;
+
+        for (int i = 0; i < data.length; i++) {
+            if (!ValidationUtility.isNotNullOrNotEmpty(data[i])) {
+                return fields[i] + " is empty or null.";
             }
         }
 
+        String email = data[3], phone = data[4], salary = data[6], date = data[7];
+        if (!ValidationUtility.isEmailValid(email)) return "Invalid email: " + email;
+        if (ValidationUtility.isPhoneNumberValid(phone)) return "Invalid phone: " + phone;
+        if (!ValidationUtility.isDoubleValid(salary)) return "Invalid salary: " + salary;
+        if (ValidationUtility.isDateValid(date) == null) return "Invalid date: " + date;
 
-        try {
-            String email = empData[3];
-            String phone = empData[4];
-            String salary = empData[6];
-            String joinDate = empData[7];
-
-            if (!ValidationUtility.isEmailValid(email)) {
-                return "Invalid email: " + email;
-            }
-            if (ValidationUtility.isPhoneNumberValid(phone)) {
-                return "Invalid phone number: " + phone;
-            }
-            if (!ValidationUtility.isDoubleValid(salary)) {
-                return "Invalid salary: " + salary;
-            }
-            if (ValidationUtility.isDateValid(joinDate) == null) {
-                return "Invalid join date: " + joinDate;
-            }
-
-            return null; // No error
-        } catch (Exception e) {
-            return "Validation exception: " + e.getMessage();
-        }
+        return null;
     }
 }

@@ -1,6 +1,8 @@
 package com.litmus.employeemanagementsystem.dao;
 
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +16,7 @@ import com.litmus.employeemanagementsystem.util.DBConnection;
 public class EmployeeDAO  {
 	
 	//To add employee data to db
-	public boolean addEmployee(Employee emp) throws SQLException {
+	public boolean addEmployee(Employee emp) throws SQLException, FileNotFoundException, IOException {
 		
 		Connection conn = DBConnection.getConnection();
 		PreparedStatement pst = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);
@@ -35,7 +37,7 @@ public class EmployeeDAO  {
 	}
 	
 	//To check Employee exist or not
-	public boolean isEmployeeIDExist(String empId) throws SQLException {
+	public boolean isEmployeeIDExist(String empId) throws SQLException, FileNotFoundException, IOException {
 		
 		Connection conn = DBConnection.getConnection();
 		PreparedStatement pst = conn.prepareStatement(SQLConstants.CHECK_EMPLOYEE_ID_EXISTS);

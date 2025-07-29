@@ -3,16 +3,28 @@ package com.litmus.employeemanagementsystem.util;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class DBConnection {
 
-		private static String url = "jdbc:mysql://localhost:3306/emp_mgt_sys";
-		private static String username = "root";
-	    private static String pwd = "Suneeta@123";
+		private static String url;
+		private static String username;
+	    private static String pwd;
 		
 	   
 	
-		public static Connection getConnection() throws SQLException {
+		public static Connection getConnection() throws SQLException, FileNotFoundException, IOException {
+			
+			Properties props = new Properties();
+			props.load(new FileInputStream("config.properties"));
+			
+			url = props.getProperty("dburl");
+		    username = props.getProperty("dbUser");
+		    pwd = props.getProperty("dbPassword");
+		
 			return  DriverManager.getConnection(url,username,pwd);
 		
 		}
