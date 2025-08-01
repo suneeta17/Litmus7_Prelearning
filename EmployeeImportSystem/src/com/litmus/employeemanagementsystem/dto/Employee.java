@@ -8,7 +8,7 @@ import com.litmus.employeemanagementsystem.util.ValidationUtility;
 
 public class Employee {
 	
-	private String empId;
+	private String employeeId;
     private String firstName;
     private String lastName;
     private String email;
@@ -19,19 +19,20 @@ public class Employee {
 	
 	public Employee(String[] empData) throws ParseException {
 		
-		 empId = empData[0];
+		 employeeId = empData[0];
 		 firstName = empData[1];
 		 lastName = empData[2];
 		 email = empData[3];
 		 phone = empData[4];
 		 department = empData[5];
-		 salary = Double.parseDouble(empData[6]);
-		 joinDate = ValidationUtility.isDateValid(empData[7]);
+		 salary = ValidationUtility.isDoubleValid(empData[6]) ? Double.parseDouble(empData[6]) : null;
+		 joinDate = ValidationUtility.isDateFormatValid(empData[7]) ? ValidationUtility.isDateValid(empData[7]) : null;
+
 		
 		
 	}
 	
-	public String getEmpId() { return empId; }
+	public String getEmpId() { return employeeId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public String getEmail() { return email; }

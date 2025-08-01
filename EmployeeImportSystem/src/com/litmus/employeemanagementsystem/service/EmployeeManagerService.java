@@ -9,7 +9,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 public class EmployeeManagerService {
 	
@@ -38,13 +43,13 @@ public class EmployeeManagerService {
         }
 
         for (Employee emp : validEmployees) {
-            String empId = emp.getEmpId();
-            if (dao.isEmployeeIDExist(empId)) {
-                result.get("error").add("Duplicate Employee ID: " + empId);
+            String employeeId = emp.getEmpId();
+            if (dao.isEmployeeIDExist(employeeId)) {
+                result.get("error").add("Duplicate Employee ID: " + employeeId);
             } else if (dao.addEmployee(emp)) {
-                result.get("success").add("Inserted: " + empId);
+                result.get("success").add("Inserted: " + employeeId);
             } else {
-                result.get("error").add("Failed to insert: " + empId);
+                result.get("error").add("Failed to insert: " + employeeId);
             }
         }
 

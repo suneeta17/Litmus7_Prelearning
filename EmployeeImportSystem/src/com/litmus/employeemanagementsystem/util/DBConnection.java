@@ -10,12 +10,9 @@ import java.io.IOException;
 
 public class DBConnection {
 
-		private static String url;
-		private static String username;
-	    private static String pwd;
+		private static String url, username,pwd;
 		
-	   
-	
+
 		public static Connection getConnection() throws SQLException, FileNotFoundException, IOException {
 			
 			Properties props = new Properties();
