@@ -82,7 +82,7 @@ public class EmployeeManagerService {
 
         String email = data[3], phone = data[4], salary = data[6], date = data[7];
         if (!ValidationUtility.isEmailValid(email)) return "Invalid email: " + email;
-        if (ValidationUtility.isPhoneNumberValid(phone)) return "Invalid phone: " + phone;
+        if (!ValidationUtility.isPhoneNumberValid(phone)) return "Invalid phone: " + phone;
         if (!ValidationUtility.isDoubleValid(salary)) return "Invalid salary: " + salary;
         if (ValidationUtility.isDateValid(date) == null) return "Invalid date: " + date;
 
