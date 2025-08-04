@@ -2,10 +2,11 @@ package com.litmus.employeemanagementsystem.service;
 
 import com.litmus.employeemanagementsystem.dao.EmployeeDAO;
 import com.litmus.employeemanagementsystem.dto.Employee;
+import com.litmus.employeemanagementsystem.util.CSVReader;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -20,17 +21,13 @@ public class EmployeeManagerService {
 	
 	//Method to import employee data to database
     public Map<String, List<String>> importEmployeeDataToDB(String filePath) throws ParseException, IOException, SQLException {
-        EmployeeDAO dao = new EmployeeDAO();
+        EmployeeDAO employeeDAO = new EmployeeDAO();
         Map<String, List<String>> result = new HashMap<>();
         result.put("success", new ArrayList<>());
         result.put("error", new ArrayList<>());
 
-        if (ValidationUtility.isCSVFile(filePath)) {
-            result.get("error").add("Invalid file type. Please provide a CSV file.");
-            return result;
-        }
 
-        List<String[]> rows = loadCSV(filePath);
+        List<String[]> rows = CSVReader.loadData(filePath);
         List<Employee> validEmployees = new ArrayList<>();
 
         for (String[] row : rows) {
@@ -43,10 +40,10 @@ public class EmployeeManagerService {
         }
 
         for (Employee emp : validEmployees) {
-            String employeeId = emp.getEmpId();
-            if (dao.isEmployeeIDExist(employeeId)) {
+            String employeeId = emp.getEmployeeId();
+            if (employeeDAO.isEmployeeIDExist(employeeId)) {
                 result.get("error").add("Duplicate Employee ID: " + employeeId);
-            } else if (dao.addEmployee(emp)) {
+            } else if (employeeDAO.saveEmployee(emp)) {
                 result.get("success").add("Inserted: " + employeeId);
             } else {
                 result.get("error").add("Failed to insert: " + employeeId);
@@ -55,19 +52,13 @@ public class EmployeeManagerService {
 
         return result;
     }
-
-    //Method to load employee data from csv file
-    private List<String[]> loadCSV(String path) throws IOException {
-        List<String[]> data = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            br.readLine(); // skip header
-            String line;
-            while ((line = br.readLine()) != null) {
-                data.add(line.split(","));
-            }
-        }
-        return data;
+    
+    //Method to fetch all Employees from DAO
+    public List<Employee> getAllEmployees() throws FileNotFoundException, IOException {
+    	EmployeeDAO employeeDAO = new EmployeeDAO();
+        return employeeDAO.getAllEmployees();
     }
+   
 
     //Method to validate employee record
     private String validate(String[] data) throws ParseException {
