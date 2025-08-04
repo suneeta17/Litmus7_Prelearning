@@ -60,7 +60,7 @@ public class EmployeeManagerController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.EMPLOYEES_RETRIEVED_FAILURE, null);
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.EMPLOYEES_RETRIEVED_FAILURE);
         }
     }
 }

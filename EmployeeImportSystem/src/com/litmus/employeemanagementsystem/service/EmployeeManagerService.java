@@ -19,9 +19,10 @@ import java.util.Map;
 
 public class EmployeeManagerService {
 	
+	private EmployeeDAO employeeDAO = new EmployeeDAO();
+	
 	//Method to import employee data to database
     public Map<String, List<String>> importEmployeeDataToDB(String filePath) throws ParseException, IOException, SQLException {
-        EmployeeDAO employeeDAO = new EmployeeDAO();
         Map<String, List<String>> result = new HashMap<>();
         result.put("success", new ArrayList<>());
         result.put("error", new ArrayList<>());
@@ -55,7 +56,6 @@ public class EmployeeManagerService {
     
     //Method to fetch all Employees from DAO
     public List<Employee> getAllEmployees() throws FileNotFoundException, IOException {
-    	EmployeeDAO employeeDAO = new EmployeeDAO();
         return employeeDAO.getAllEmployees();
     }
    

@@ -12,16 +12,24 @@ public class DBConnection {
 
 		private static String url, username,pwd;
 		
-
-		public static Connection getConnection() throws SQLException, FileNotFoundException, IOException {
-			
+		static {
 			Properties props = new Properties();
-			props.load(new FileInputStream("config.properties"));
+			try {
+				props.load(new FileInputStream("config.properties"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
 			url = props.getProperty("dburl");
 		    username = props.getProperty("dbUser");
 		    pwd = props.getProperty("dbPassword");
+		}
 		
+
+		public static Connection getConnection() throws SQLException {
+			
 			return  DriverManager.getConnection(url,username,pwd);
 		
 		}
