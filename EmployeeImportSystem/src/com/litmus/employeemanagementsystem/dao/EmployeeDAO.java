@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.litmus.employeemanagementsystem.CONSTANT.EmployeeTableConstants;
+import com.litmus.employeemanagementsystem.constant.EmployeeTableConstants;
 import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.util.DBConnection;
 

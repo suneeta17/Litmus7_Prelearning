@@ -1,4 +1,4 @@
-package com.litmus.employeemanagementsystem.CONSTANT;
+package com.litmus.employeemanagementsystem.constant;
 
 public class EmployeeTableConstants {
 	

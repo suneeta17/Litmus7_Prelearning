@@ -2,8 +2,8 @@ package com.litmus.employeemanagementsystem.controller;
 
 import com.litmus.employeemanagementsystem.service.EmployeeManagerService;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
-import com.litmus.employeemanagementsystem.CONSTANT.StatusCodes;
-import com.litmus.employeemanagementsystem.CONSTANT.MessageConstants;
+import com.litmus.employeemanagementsystem.constant.MessageConstants;
+import com.litmus.employeemanagementsystem.constant.StatusCodes;
 import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.dto.Response;
 

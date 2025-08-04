@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import com.litmus.employeemanagementsystem.CONSTANT.Regex_Constants;
+import com.litmus.employeemanagementsystem.constant.Regex_Constants;
 
 public class ValidationUtility {
 	

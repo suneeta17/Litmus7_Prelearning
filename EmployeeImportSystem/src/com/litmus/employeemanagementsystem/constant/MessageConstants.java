@@ -1,4 +1,4 @@
-package com.litmus.employeemanagementsystem.CONSTANT;
+package com.litmus.employeemanagementsystem.constant;
 
 public class MessageConstants {
     public static final String FILE_PATH_NULL = "File path cannot be null or empty.";

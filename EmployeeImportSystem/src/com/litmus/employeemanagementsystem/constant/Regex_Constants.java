@@ -1,4 +1,4 @@
-package com.litmus.employeemanagementsystem.CONSTANT;
+package com.litmus.employeemanagementsystem.constant;
 
 public class Regex_Constants {
     public static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
