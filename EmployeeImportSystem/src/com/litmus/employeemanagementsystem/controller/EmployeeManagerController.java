@@ -6,6 +6,7 @@ import com.litmus.employeemanagementsystem.constant.MessageConstants;
 import com.litmus.employeemanagementsystem.constant.StatusCodes;
 import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.dto.Response;
+import com.litmus.employeemanagementsystem.exception.EmployeeServiceException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -26,7 +27,7 @@ public class EmployeeManagerController {
         if (!ValidationUtility.isCSVFile(filePath)) {
             return new Response<>(StatusCodes.BAD_REQUEST, MessageConstants.INVALID_FILE_TYPE);
         }
-
+        try {
         Map<String, List<String>> result = employeeManagerService.importEmployeeDataToDB(filePath);
 
         List<String> success = result.get("success");
@@ -48,7 +49,10 @@ public class EmployeeManagerController {
         }
 
         return new Response<>(error.isEmpty() ? StatusCodes.OK : StatusCodes.PARTIAL_SUCCESS, msg.toString());
-    }
+    
+    }catch (EmployeeServiceException e) {
+    	return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, "Import Failed: " + e.getMessage());
+    }}
 
     public Response<List<Employee>> getAllEmployees() {
         try {
@@ -58,9 +62,9 @@ public class EmployeeManagerController {
             } else {
                 return new Response<>(StatusCodes.OK, MessageConstants.EMPLOYEES_RETRIEVED_SUCCESS, employees);
             }
-        } catch (Exception e) {
+        } catch (EmployeeServiceException e) {
             e.printStackTrace();
-            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.EMPLOYEES_RETRIEVED_FAILURE);
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.EMPLOYEES_RETRIEVED_FAILURE+e.getMessage());
         }
     }
 }

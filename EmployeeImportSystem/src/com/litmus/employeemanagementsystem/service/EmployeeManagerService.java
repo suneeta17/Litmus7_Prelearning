@@ -2,13 +2,14 @@ package com.litmus.employeemanagementsystem.service;
 
 import com.litmus.employeemanagementsystem.dao.EmployeeDAO;
 import com.litmus.employeemanagementsystem.dto.Employee;
+import com.litmus.employeemanagementsystem.exception.EmployeeDaoException;
+import com.litmus.employeemanagementsystem.exception.EmployeeServiceException;
 import com.litmus.employeemanagementsystem.util.CSVReader;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
 
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,26 +23,38 @@ public class EmployeeManagerService {
 	private EmployeeDAO employeeDAO = new EmployeeDAO();
 	
 	//Method to import employee data to database
-    public Map<String, List<String>> importEmployeeDataToDB(String filePath) throws ParseException, IOException, SQLException {
+    public Map<String, List<String>> importEmployeeDataToDB(String filePath) throws  EmployeeServiceException {
         Map<String, List<String>> result = new HashMap<>();
         result.put("success", new ArrayList<>());
         result.put("error", new ArrayList<>());
+        List<String[]> rows;
+        
 
-
-        List<String[]> rows = CSVReader.loadData(filePath);
+        try {
+        rows = CSVReader.loadData(filePath);
+        }catch(IOException e) {
+        	throw new EmployeeServiceException("Service error while reading CSV file",e);
+        }
         List<Employee> validEmployees = new ArrayList<>();
 
-        for (String[] row : rows) {
+        try {
+		for (String[] row : rows) {
             String error = validate(row);
             if (error != null) {
                 result.get("error").add("Invalid: " + Arrays.toString(row) + " | Reason: " + error);
             } else {
                 validEmployees.add(new Employee(row));
             }
-        }
+		}}catch (ParseException e) {
+			throw new EmployeeServiceException("Server error while parsing data",e);
+			
+		}
+        
 
         for (Employee emp : validEmployees) {
             String employeeId = emp.getEmployeeId();
+            
+            try {
             if (employeeDAO.isEmployeeIDExist(employeeId)) {
                 result.get("error").add("Duplicate Employee ID: " + employeeId);
             } else if (employeeDAO.saveEmployee(emp)) {
@@ -49,19 +62,26 @@ public class EmployeeManagerService {
             } else {
                 result.get("error").add("Failed to insert: " + employeeId);
             }
+            }catch (EmployeeDaoException e) {
+            	throw new EmployeeServiceException("DAO error while processing and importing employye data",e);
+            }
         }
 
         return result;
     }
     
     //Method to fetch all Employees from DAO
-    public List<Employee> getAllEmployees() throws FileNotFoundException, IOException {
-        return employeeDAO.getAllEmployees();
+    public List<Employee> getAllEmployees() throws EmployeeServiceException{
+        try{
+        	return employeeDAO.getAllEmployees();
+        }catch (EmployeeDaoException e) {
+        	throw new EmployeeServiceException("Server layer failed to fetch employees",e);
+        }
     }
    
 
     //Method to validate employee record
-    private String validate(String[] data) throws ParseException {
+    private String validate(String[] data) throws ParseException  {
         String[] fields = {"Employee ID", "First Name", "Last Name", "Email", "Phone", "Department", "Salary", "Join Date"};
         if (data.length != fields.length) return "Expected " + fields.length + " fields, got " + data.length;
 

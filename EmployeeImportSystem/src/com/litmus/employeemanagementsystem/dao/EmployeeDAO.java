@@ -12,13 +12,14 @@ import java.util.List;
 
 import com.litmus.employeemanagementsystem.constant.EmployeeTableConstants;
 import com.litmus.employeemanagementsystem.dto.Employee;
+import com.litmus.employeemanagementsystem.exception.EmployeeDaoException;
 import com.litmus.employeemanagementsystem.util.DBConnection;
 
 
 public class EmployeeDAO  {
 	
 	//To add employee data to db
-	public boolean saveEmployee(Employee emp) throws SQLException, FileNotFoundException, IOException {
+	public boolean saveEmployee(Employee emp) throws  EmployeeDaoException {
 		
 		try(Connection conn = DBConnection.getConnection();
 		PreparedStatement pst = conn.prepareStatement(EmployeeTableConstants.INSERT_EMPLOYEE);){
@@ -36,14 +37,13 @@ public class EmployeeDAO  {
 	    return rowsInserted > 0;
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new EmployeeDaoException("Database error while saveing employee into Database", e);
 		}
 	    	
 	}
 	
 	//To check Employee exist or not
-	public boolean isEmployeeIDExist(String employeeId) throws FileNotFoundException, IOException  {
+	public boolean isEmployeeIDExist(String employeeId) throws  EmployeeDaoException  {
 		
 		try (Connection conn = DBConnection.getConnection();
 		PreparedStatement pst = conn.prepareStatement(EmployeeTableConstants.CHECK_EMPLOYEE_ID_EXISTS);){
@@ -53,8 +53,7 @@ public class EmployeeDAO  {
 		
 		return rs.next();}
 		catch(SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new EmployeeDaoException("Database error." ,e);
 
 		}
 		
@@ -62,7 +61,7 @@ public class EmployeeDAO  {
 	}
 	
 	//To get all employees
-	public List<Employee> getAllEmployees() throws FileNotFoundException, IOException {
+	public List<Employee> getAllEmployees() throws  EmployeeDaoException {
 		List<Employee> employees = new ArrayList<>();
 		
 
@@ -86,7 +85,7 @@ public class EmployeeDAO  {
             }
 
 	    } catch (SQLException e) {
-	        e.printStackTrace();
+	        throw new EmployeeDaoException("Database error while fetching employee data from Database",e);
 	    }
 
 	    return employees; 

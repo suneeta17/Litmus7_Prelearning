@@ -15,7 +15,7 @@ public class EmployeeManagerClient {
     public static void main(String[] args) throws ParseException, IOException, SQLException {
         
     	 EmployeeManagerController controller = new EmployeeManagerController();
-    	 String filePath = "C:\\Users\\sunee\\eclipse-workspace\\Litmus PreLearning\\data\\employee_data.csv";
+    	 String filePath = "C:\\Users\\sunee\\eclipse-workspace\\Litmus PreLearning\\employee_data.csv";
 
 
     	 Response<String> response = controller.importEmployeeData(filePath);
