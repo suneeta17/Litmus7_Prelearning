@@ -1,6 +1,6 @@
 package com.litmus.employeemanagementsystem.constant;
 
-public class EmployeeTableConstants {
+public class SQLConstants {
 	
 	// Column Name Constants
 	public static final String COLUMN_EMPLOYEE_ID = "emp_id";
@@ -43,5 +43,36 @@ public class EmployeeTableConstants {
     	    COLUMN_SALARY + ", " +
     	    COLUMN_JOIN_DATE +
     	    " FROM employees";
+    
+    //SQL Query to delete an employee by ID
+    public static final String DELETE_EMPLOYEE_BY_ID =
+    		"DELETE FROM employees  WHERE " + COLUMN_EMPLOYEE_ID + "=?";
+    
+    //SQL Query to fetch Employee by ID
+    public static final String GET_EMPLOYEE_BY_ID =
+    		"SELECT "+
+			COLUMN_EMPLOYEE_ID + ", " +
+    	    COLUMN_FIRST_NAME + ", " +
+    	    COLUMN_LAST_NAME + ", " +
+    	    COLUMN_EMAIL + ", " +
+    	    COLUMN_PHONE + ", " +
+    	    COLUMN_DEPARTMENT + ", " +
+    	    COLUMN_SALARY + ", " +
+    	    COLUMN_JOIN_DATE +
+    	    " FROM employees WHERE " +
+    	    COLUMN_EMPLOYEE_ID + "=?";
+    
+    //SQL Query to Update Employee Details
+    public static final String UPDATE_EMPLOYEE =
+    "UPDATE employees SET " +
+    COLUMN_FIRST_NAME + " = ?, " +
+    COLUMN_LAST_NAME + " = ?, " +
+    COLUMN_EMAIL + " = ?, " +
+    COLUMN_PHONE + " = ?, " +
+    COLUMN_DEPARTMENT + " = ?, " +
+    COLUMN_SALARY + " = ?, " +
+    COLUMN_JOIN_DATE + " = ? " +
+    "WHERE " + COLUMN_EMPLOYEE_ID + " =?";
+
 
 }

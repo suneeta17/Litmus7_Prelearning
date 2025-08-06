@@ -8,7 +8,9 @@ public class StatusCodes {
     public static final int NO_CONTENT = 204;             // No records found
     public static final int BAD_REQUEST = 400;            // Invalid input
     public static final int INTERNAL_SERVER_ERROR = 500;  // General server error
-
+    public static final int NOT_FOUND = 404;  
+    public static final int CONFLICT = 409;   
+    
     private StatusCodes() {
         
     }

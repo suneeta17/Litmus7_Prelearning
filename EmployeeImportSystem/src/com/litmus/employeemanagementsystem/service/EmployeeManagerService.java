@@ -8,7 +8,6 @@ import com.litmus.employeemanagementsystem.util.CSVReader;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
 
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.Map;
 
 public class EmployeeManagerService {
 	
+	public enum Status {SUCCESS,NOT_FOUND,FAILED,ALREADY_EXIST}
 	private EmployeeDAO employeeDAO = new EmployeeDAO();
 	
 	//Method to import employee data to database
@@ -70,13 +70,96 @@ public class EmployeeManagerService {
         return result;
     }
     
-    //Method to fetch all Employees from DAO
+    
+    //Method to fetch all Employees from database
     public List<Employee> getAllEmployees() throws EmployeeServiceException{
         try{
         	return employeeDAO.getAllEmployees();
         }catch (EmployeeDaoException e) {
-        	throw new EmployeeServiceException("Server layer failed to fetch employees",e);
+        	throw new EmployeeServiceException("Server failed to fetch employees",e);
         }
+    }
+    
+    //Method to fetch employee record by ID
+    public Employee getEmployeebyId(String employeeId) throws EmployeeServiceException {
+    	try {
+    		return EmployeeDAO.getEmployeeById(employeeId);
+    	}catch (EmployeeDaoException e) {
+    		throw new EmployeeServiceException("Server failed tp fetch employee with ID "+ employeeId, e);
+    	}
+    }
+    
+    //Method to Add a new Employee
+    public Status addEmployee(List<String> data) throws EmployeeServiceException {
+        try {
+            // Convert list to array for Employee constructor
+            String[] employeeData = data.toArray(new String[0]);
+
+   
+            // Validate Employee object
+            String validationError = validate(employeeData);
+            if (validationError != null) {
+                return Status.FAILED; 
+            }
+            
+            Employee employee = new Employee(employeeData);
+
+            // Check if Employee exists
+            if (employeeDAO.isEmployeeIDExist(employee.getEmployeeId())) {
+                return Status.ALREADY_EXIST;
+            }
+
+            // Save new Employee
+            boolean added = employeeDAO.saveEmployee(employee);
+            return added ? Status.SUCCESS : Status.FAILED;
+
+        } catch (EmployeeDaoException e) {
+            throw new EmployeeServiceException("Error adding  new employee: " + e.getMessage(), e);
+        } catch (ParseException e) {
+            throw new EmployeeServiceException("Error parsing employee data: " + e.getMessage(), e);
+        }
+    }
+       
+    
+    //Method to update Employee
+    public Status updateEmployee(List<String> data) throws EmployeeServiceException {
+        try {
+            // Convert list to array for Employee constructor
+            String[] employeeData = data.toArray(new String[0]);
+
+   
+            // Validate Employee object
+            String validationError = validate(employeeData);
+            if (validationError != null) {
+                System.out.println("Validation failed: " + validationError);
+                return Status.FAILED; 
+            }
+            
+            Employee employee = new Employee(employeeData);
+
+            // Check if Employee exists
+            if (!employeeDAO.isEmployeeIDExist(employee.getEmployeeId())) {
+                return Status.NOT_FOUND;
+            }
+
+            // Perform update
+            boolean updated = employeeDAO.updateEmployee(employee);
+            return updated ? Status.SUCCESS : Status.FAILED;
+
+        } catch (EmployeeDaoException e) {
+            throw new EmployeeServiceException("Error updating employee: " + e.getMessage(), e);
+        } catch (ParseException e) {
+            throw new EmployeeServiceException("Error parsing employee data: " + e.getMessage(), e);
+        }
+    }
+    
+    //Method to delete  employee by ID from database
+    public boolean deleteEmployeeById(String employeeId) throws EmployeeServiceException{
+    try {
+    	return employeeDAO.deleteEmployeeById(employeeId);
+    }catch (EmployeeDaoException e) {
+    	throw new EmployeeServiceException("Server Failed to delete Employee with ID " + employeeId,e);
+    }
     }
    
 

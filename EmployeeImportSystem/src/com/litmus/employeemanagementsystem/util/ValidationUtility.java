@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import com.litmus.employeemanagementsystem.constant.Regex_Constants;
+import com.litmus.employeemanagementsystem.constant.RegexConstants;
 
 public class ValidationUtility {
 	
@@ -20,22 +20,22 @@ public class ValidationUtility {
 
     // Checks whether phone number is valid
     public static boolean isPhoneNumberValid(String phoneNumber) {
-        return phoneNumber != null && phoneNumber.matches(Regex_Constants.PHONE_REGEX);
+        return phoneNumber != null && phoneNumber.matches(RegexConstants.PHONE_REGEX);
     }
 
     // Checks whether email is in valid format
     public static boolean isEmailValid(String email) {
-        return email != null && email.matches(Regex_Constants.EMAIL_REGEX);
+        return email != null && email.matches(RegexConstants.EMAIL_REGEX);
     }
 
     // Checks whether value is a valid double
     public static boolean isDoubleValid(String value) {
-        return value != null && value.matches(Regex_Constants.DOUBLE_REGEX);
+        return value != null && value.matches(RegexConstants.DOUBLE_REGEX);
     }
 
     // Checks if date string is in expected format
     public static boolean isDateFormatValid(String date) {
-        return date != null && date.matches(Regex_Constants.DATE_FORMAT_REGEX);
+        return date != null && date.matches(RegexConstants.DATE_FORMAT_REGEX);
     }
 
     // Parses and returns valid SQL Date, or null if invalid

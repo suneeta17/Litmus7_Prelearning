@@ -1,6 +1,7 @@
 package com.litmus.employeemanagementsystem.controller;
 
 import com.litmus.employeemanagementsystem.service.EmployeeManagerService;
+import com.litmus.employeemanagementsystem.service.EmployeeManagerService.Status;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
 import com.litmus.employeemanagementsystem.constant.MessageConstants;
 import com.litmus.employeemanagementsystem.constant.StatusCodes;
@@ -8,9 +9,6 @@ import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.dto.Response;
 import com.litmus.employeemanagementsystem.exception.EmployeeServiceException;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +16,7 @@ public class EmployeeManagerController {
 
     private EmployeeManagerService employeeManagerService = new EmployeeManagerService();
 
-    public Response<String> importEmployeeData(String filePath) throws ParseException, IOException, SQLException {
+    public Response<String> importEmployeeData(String filePath)  {
         
         if (!ValidationUtility.isNotNullOrNotEmpty(filePath)) {
             return new Response<>(StatusCodes.BAD_REQUEST, MessageConstants.FILE_PATH_NULL);
@@ -52,7 +50,10 @@ public class EmployeeManagerController {
     
     }catch (EmployeeServiceException e) {
     	return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, "Import Failed: " + e.getMessage());
-    }}
+    }catch (Exception e) {
+        return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+    }
+  }
 
     public Response<List<Employee>> getAllEmployees() {
         try {
@@ -63,8 +64,89 @@ public class EmployeeManagerController {
                 return new Response<>(StatusCodes.OK, MessageConstants.EMPLOYEES_RETRIEVED_SUCCESS, employees);
             }
         } catch (EmployeeServiceException e) {
-            e.printStackTrace();
             return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.EMPLOYEES_RETRIEVED_FAILURE+e.getMessage());
+        }
+        catch (Exception e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+        }
+    }
+    
+   public Response<Employee> getEmployeeById(String employeeId){
+	   try {
+		   Employee employee =  employeeManagerService.getEmployeebyId(employeeId);
+		   if(employee == null) {
+			   return new Response<>(StatusCodes.NOT_FOUND,MessageConstants.NOT_FOUND);
+		   }else {
+			   return new Response<>(StatusCodes.OK,MessageConstants.EMPLOYEES_RETRIEVED_SUCCESS,employee);
+		   }
+	   }catch(EmployeeServiceException e) {
+		   return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR,MessageConstants.EMPLOYEES_RETRIEVED_FAILURE+ e.getMessage());
+	   }
+	   catch (Exception e) {
+           return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+       }
+   }
+   
+   
+   public Response<String> addEmployee(List<String> data) {
+	    try {
+	        Status status = employeeManagerService.addEmployee(data);
+
+	        switch (status) {
+	            case SUCCESS:
+	                return new Response<>(StatusCodes.CREATED, MessageConstants.ADDED); 
+	            case ALREADY_EXIST:
+	                return new Response<>(StatusCodes.CONFLICT, MessageConstants.ALREADY_EXISTS);
+	            case FAILED:
+	                return new Response<>(StatusCodes.BAD_REQUEST, MessageConstants.INVALID_DATA);
+	            default:
+	                return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR);
+	        }
+
+	    } catch (EmployeeServiceException e) {
+	        return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+	    }
+	    catch (Exception e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+        }
+	}
+
+   
+   public Response<String> updateEmployee(List<String> data) {
+	    try {
+	        Status status = employeeManagerService.updateEmployee(data);
+
+	        switch (status) {
+	            case SUCCESS:
+	                return new Response<>(StatusCodes.OK, MessageConstants.UPDATED);
+	            case NOT_FOUND:
+	                return new Response<>(StatusCodes.NOT_FOUND, MessageConstants.NOT_FOUND);
+	            case FAILED:
+	                return new Response<>(StatusCodes.BAD_REQUEST, MessageConstants.INVALID_DATA); 
+	            default:
+	                return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR);
+	        }
+	    } catch (EmployeeServiceException e) {
+	        return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+	    }catch (Exception e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+        }
+	
+	}
+
+    
+    public Response<String> deleteEmployeeById(String employeeId){
+    	try {
+    	boolean result = employeeManagerService.deleteEmployeeById(employeeId);
+    	if (result) {
+    		return new Response<>(StatusCodes.OK,MessageConstants.EMPLOYEE_DELETED_SUCCESS);
+    	}else {
+    		return new Response<>(StatusCodes.NOT_FOUND,MessageConstants.EMPLOYEE_DELETED_FAILURE);
+    		}
+    	}catch (EmployeeServiceException e) {
+    		return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR,MessageConstants.INTERNAL_SERVER_ERROR);
+    	}catch (Exception e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
         }
     }
 }
