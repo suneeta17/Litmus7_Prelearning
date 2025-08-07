@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.litmus.employeemanagementsystem.controller.EmployeeManagerController;
 import com.litmus.employeemanagementsystem.dto.Employee;
@@ -16,7 +17,7 @@ public class EmployeeManagerClient {
     public static void main(String[] args) throws ParseException, IOException, SQLException {
         
 		EmployeeManagerController controller = new EmployeeManagerController();
-		String filePath = "C:\\Users\\sunee\\eclipse-workspace\\Litmus PreLearning\\data\\employee_data.csv";
+		/*String filePath = "C:\\Users\\sunee\\eclipse-workspace\\Litmus PreLearning\\data\\employee_data.csv";
 	
 	
 		Response<String> response = controller.importEmployeeData(filePath);
@@ -47,7 +48,7 @@ public class EmployeeManagerClient {
             }
         } 
         
-        //Get Employee by Id
+          //Get Employee by Id
         Response<Employee> employeeResponse = controller.getEmployeeById("102");
         System.out.println("\n=== Get Employee Details by ID ===");
         System.out.println("Status Code: " + employeeResponse.getStatusCode());
@@ -66,31 +67,31 @@ public class EmployeeManagerClient {
             System.out.println("Join Date: " + employee.getJoinDate());   	
         }
         
-    	 //Delete Employee by ID
-        Response<String> deleted = controller.deleteEmployeeById("210");
-        System.out.println("\n=== Deletion Operation in Database ===");
-        System.out.println("Status Code: " + deleted.getStatusCode());
-        System.out.println(deleted.getMessage());
+	    	 //Delete Employee by ID
+	        Response<String> deleted = controller.deleteEmployeeById("301");
+	        System.out.println("\n=== Deletion Operation in Database ===");
+	        System.out.println("Status Code: " + deleted.getStatusCode());
+	        System.out.println(deleted.getMessage());
         
         
-        // Update Employee Details 
-    	 List<String> updatedEmployeeData = Arrays.asList(
-    	     "105",                       
-    	     "Alice",                    
-    	     "Mathew",                    
-    	     "alice.mathew@example.com",  
-    	     "9123456789",                
-    	     "HR",                       
-    	     "60000",                     
-    	     "24-05-2024"                
-    	 );
-
-    	 Response<String> updateResponse = controller.updateEmployee(updatedEmployeeData);
-
-    	 System.out.println("\n=== Update Employee Operation ===");
-    	 System.out.println("Status Code: " + updateResponse.getStatusCode());
-    	 System.out.println(updateResponse.getMessage());
-    	 
+	        // Update Employee Details 
+	    	 List<String> updatedEmployeeData = Arrays.asList(
+	    	     "105",                       
+	    	     "Alice",                    
+	    	     "Mathew",                    
+	    	     "alice.mathew@example.com",  
+	    	     "9123456789",                
+	    	     "HR",                       
+	    	     "60000",                     
+	    	     "24-05-2024"                
+	    	 );
+	
+	    	 Response<String> updateResponse = controller.updateEmployee(updatedEmployeeData);
+	
+	    	 System.out.println("\n=== Update Employee Operation ===");
+	    	 System.out.println("Status Code: " + updateResponse.getStatusCode());
+	    	 System.out.println(updateResponse.getMessage());
+	    	 
     	 
     	// Add New Employee 
     	 List<String> newEmployeeData = Arrays.asList(
@@ -108,7 +109,41 @@ public class EmployeeManagerClient {
 
     	 System.out.println("\n=== Add Employee Operation ===");
     	 System.out.println("Status Code: " + addResponse.getStatusCode());
-    	 System.out.println(addResponse.getMessage());
+    	 System.out.println(addResponse.getMessage());*/
+    	 
+		
+		// --- Add Multiple Employees in Batch ---
+		System.out.println("\n=== Add employees in Batch Operation ===");
+		List<String[]> employeeDataList= Arrays.asList(
+		    new String[]{"301", "Asha", "Thomas", "asha.t@example.com", "9012345678", "HR", "50000", "10-05-2024"},
+		    new String[]{"302", "Varun", "Menon", "varun.m@example.com", "9112345678", "Finance", "60000", "12-06-2024"},
+		    new String[]{"303", "Riya", "", "riya.r@example.com", "9212345678", "IT", "70000", "14-07-2024"}, 
+		    new String[]{"", "Manu", "George", "manu.g@example.com", "9312345678", "Marketing", "65000", "20-08-2024"} 
+		);
+
+        
+        Response<String> batchResponse = controller.addEmployeeInBatches(employeeDataList);
+
+        
+        System.out.println("Status Code: " + batchResponse.getStatusCode());
+        System.out.println("Message:\n" + batchResponse.getMessage());
+
+        // Transfer employee to new department
+		System.out.println("\n=== Transfer  Employee Department Function ===");
+		List<String> employeeIds = Arrays.asList("101", "102", "103"); // Assume E999 may not exist
+		String newDepartment = "Engineering";
+
+		
+		Response<String> transferDepartmentResponse = controller.transferEmployeesToDepartment(employeeIds, newDepartment);
+
+		
+		int statusCode = transferDepartmentResponse.getStatusCode();
+		String message = transferDepartmentResponse.getMessage();
+
+		System.out.println("Status Code: " + statusCode);
+		System.out.println("Message: " + message);
+
   
+       
     }
 }

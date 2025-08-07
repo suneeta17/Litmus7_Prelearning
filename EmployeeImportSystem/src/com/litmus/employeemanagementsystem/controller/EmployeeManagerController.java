@@ -149,4 +149,60 @@ public class EmployeeManagerController {
             return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
         }
     }
+    
+    public Response<String> addEmployeeInBatches(List<String[]> employeeDataList) {
+        if (employeeDataList == null || employeeDataList.isEmpty()) {
+            return new Response<>(StatusCodes.BAD_REQUEST, MessageConstants.INVALID_DATA);
+        }
+
+        try {
+            Map<String, Object> result = employeeManagerService.addEmployeesInBatch(employeeDataList);
+
+            int[] insertStatus = (int[]) result.get("insertStatus");
+            List<String> errors = (List<String>) result.get("errors");
+
+            StringBuilder msg = new StringBuilder("Batch Insert Summary:\n");
+            msg.append("Inserted: ").append(insertStatus.length).append("\n");
+            msg.append("Errors: ").append(errors.size()).append("\n\n");
+
+            if (!errors.isEmpty()) {
+                msg.append("Error Details:\n");
+                for (String err : errors) {
+                    msg.append("- ").append(err).append("\n");
+                }
+            }
+
+            return new Response<>(
+                errors.isEmpty() ? StatusCodes.CREATED : StatusCodes.PARTIAL_SUCCESS,
+                msg.toString()
+            );
+
+        } catch (EmployeeServiceException e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+        } catch (Exception e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+        }
+    }
+    
+    public Response<String> transferEmployeesToDepartment(List<String> employeeIds,String newDepartment) {
+    	try {
+			int[] departmentUpdateStatus = employeeManagerService.transferEmployeesToDepartment(employeeIds,newDepartment);
+			
+			int successCount = 0;
+			for (int status : departmentUpdateStatus) {
+				if (status > 0) successCount ++;
+			}
+			if (successCount == 0) {
+				return new Response<>(StatusCodes.NO_CONTENT,MessageConstants.DEPARTMENT_TRANSFER_FAILED);
+			}
+		return new Response<>(StatusCodes.OK,MessageConstants.DEPARTMENT_TRANSFER_SUCCESS + successCount+ " employees");
+			
+		} catch (EmployeeServiceException e) {
+			return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+		}catch (Exception e) {
+            return new Response<>(StatusCodes.INTERNAL_SERVER_ERROR, MessageConstants.INTERNAL_SERVER_ERROR + ": " + e.getMessage());
+        }
+    	
+    }
+
 }

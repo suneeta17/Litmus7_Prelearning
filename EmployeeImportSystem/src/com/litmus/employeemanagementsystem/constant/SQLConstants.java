@@ -73,6 +73,13 @@ public class SQLConstants {
     COLUMN_SALARY + " = ?, " +
     COLUMN_JOIN_DATE + " = ? " +
     "WHERE " + COLUMN_EMPLOYEE_ID + " =?";
+    
+    //SQL Query to Update Department given EmployeeID
+    public static final String UPDATE_DEPARTMENT_GIVEN_ID =
+    "UPDATE employees SET " +
+    COLUMN_DEPARTMENT + "= ?" +
+    "WHERE " + COLUMN_EMPLOYEE_ID + " =?";
+    
 
 
 }

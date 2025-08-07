@@ -15,7 +15,8 @@ public class MessageConstants {
     public static final String INVALID_DATA = "Invalid Data";
     public static final String ADDED = "Employee added successfully.";
     public static final String ALREADY_EXISTS = "Employee with this ID already exists.";
-
+    public static final String DEPARTMENT_TRANSFER_FAILED = "No employee departments were updated. Please verify the employee IDs.";
+    public static final String DEPARTMENT_TRANSFER_SUCCESS = "Successfully updated department for all ";
     
     
     

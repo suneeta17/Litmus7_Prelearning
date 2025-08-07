@@ -161,7 +161,67 @@ public class EmployeeManagerService {
     	throw new EmployeeServiceException("Server Failed to delete Employee with ID " + employeeId,e);
     }
     }
-   
+    
+    //Method to add Employees in batches
+    public Map<String, Object> addEmployeesInBatch(List<String[]> employees) throws EmployeeServiceException {
+        List<Employee> validEmployees = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+
+        for (String[] employee : employees) {
+        	String employeeId = employee[0];
+        	try {
+				if (!employeeDAO.isEmployeeIDExist(employeeId)) {
+				    try {
+				        String error = validate(employee);
+				        if (error != null) {
+				            errors.add("Invalid: " + Arrays.toString(employee) + " | Reason: " + error);
+				        } else {
+				            validEmployees.add(new Employee(employee));
+				        }
+				    } catch (ParseException e) {
+				        throw new EmployeeServiceException("Server error while parsing data: " + Arrays.toString(employee), e); 
+				}}
+			} catch (EmployeeDaoException e) {
+				throw new EmployeeServiceException("Server error Something went wrong " + Arrays.toString(employee), e); 
+			}
+        }
+
+        int[] insertStatus = new int[0];
+        if (!validEmployees.isEmpty()) {
+            try {
+				insertStatus = employeeDAO.addEmployeesInBatch(validEmployees);
+			} catch (EmployeeDaoException e) {
+				 throw new EmployeeServiceException("Server error while proceesing batch insert: ", e);
+			}
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("insertStatus", insertStatus);
+        result.put("errors", errors);
+
+        return result;
+    }
+
+    //Method to update the department of employees given the id
+    public int[] transferEmployeesToDepartment(List<String> employeeIds,String newDepartment) throws EmployeeServiceException {
+    	List<String> validEmployeeIds = new ArrayList<>();
+    	int[] updateDepartmentStatus;
+    	
+    	for(String employeeId : employeeIds) {
+    		if(ValidationUtility.isNotNullOrNotEmpty(employeeId)) {
+    			try {
+					if (employeeDAO.isEmployeeIDExist(employeeId)) validEmployeeIds.add(employeeId);
+					} catch (EmployeeDaoException e) {
+					throw new EmployeeServiceException("Server Error: Something went wrong ",e);}
+    				}
+    	}
+    	try {
+			updateDepartmentStatus = employeeDAO.transferEmployeesToDepartment(validEmployeeIds,newDepartment);
+		} catch (EmployeeDaoException e) {
+			throw new EmployeeServiceException("Server Error: Could not update Department ",e);
+		}
+    	return updateDepartmentStatus;
+    }
 
     //Method to validate employee record
     private String validate(String[] data) throws ParseException  {
@@ -182,4 +242,6 @@ public class EmployeeManagerService {
 
         return null;
     }
+    
+    
 }

@@ -61,7 +61,7 @@ public class EmployeeDAO  {
 		
 
 	    try (Connection connection = DBConnection.getConnection();
-	         PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_ALL_EMPLOYEE)) {
+	         PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_ALL_EMPLOYEE);) {
 	    	ResultSet resultSet = preparedStatement.executeQuery();
 	   
 	        
@@ -90,7 +90,7 @@ public class EmployeeDAO  {
 	public static Employee getEmployeeById(String EmployeeId) throws EmployeeDaoException {
 		Employee employee = null;
 		try (Connection connection = DBConnection.getConnection();
-			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.GET_EMPLOYEE_BY_ID)){
+			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.GET_EMPLOYEE_BY_ID);){
 			
 			pstmt.setString(1, EmployeeId);
 			ResultSet resultSet = pstmt.executeQuery();
@@ -115,7 +115,7 @@ public class EmployeeDAO  {
 	//Method to Update employee details
 	public boolean updateEmployee(Employee employee) throws EmployeeDaoException {
 		try(Connection connection = DBConnection.getConnection();
-			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.UPDATE_EMPLOYEE)){
+			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.UPDATE_EMPLOYEE);){
 			
 		    pstmt.setString(1, employee.getFirstName());
 		    pstmt.setString(2, employee.getLastName());
@@ -141,7 +141,7 @@ public class EmployeeDAO  {
 		boolean result = false;
 		
 		try(Connection connection = DBConnection.getConnection();
-			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.DELETE_EMPLOYEE_BY_ID)){
+			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.DELETE_EMPLOYEE_BY_ID);){
 			pstmt.setString(1,employeeId);
 				
 			rowsDeleted = pstmt.executeUpdate();
@@ -152,6 +152,58 @@ public class EmployeeDAO  {
 		}
 		return result;
 		
+	}
+	
+	//DAO method to add employees in batch
+	public int[] addEmployeesInBatch(List<Employee> employees) throws EmployeeDaoException {
+		
+		try(Connection connection = DBConnection.getConnection();
+			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.INSERT_EMPLOYEE);){
+			
+			for(Employee employee : employees) {
+				pstmt.setString(1, employee.getEmployeeId());
+			    pstmt.setString(2, employee.getFirstName());
+			    pstmt.setString(3, employee.getLastName());
+			    pstmt.setString(4, employee.getEmail());
+			    pstmt.setString(5, employee.getPhone());
+			    pstmt.setString(6, employee.getDepartment());
+			    pstmt.setDouble(7, employee.getSalary());
+			    pstmt.setDate(8, employee.getJoinDate());
+			    pstmt.addBatch();
+			}
+			
+			int[] rowsAffected = pstmt.executeBatch();
+			return rowsAffected ;
+			
+		}catch(SQLException e) {
+			throw new EmployeeDaoException("Database Error: Failed to process employee batches",e);
+		}
+		
+	}
+	
+	public int[] transferEmployeesToDepartment(List<String> employeeIds,String newDepartment) throws EmployeeDaoException {
+		try(Connection connection = DBConnection.getConnection();){
+			connection.setAutoCommit(false);
+			try(PreparedStatement pstmt = connection.prepareStatement(SQLConstants.UPDATE_DEPARTMENT_GIVEN_ID);){
+			
+			for(String employeeId : employeeIds) {
+				pstmt.setString(1, newDepartment);
+				pstmt.setString(2, employeeId);
+				pstmt.addBatch();
+			}	
+			int[] rowsAffected = pstmt.executeBatch();
+			connection.commit();
+			return rowsAffected ;
+			}catch(SQLException e) {
+				connection.rollback();
+				throw new EmployeeDaoException("Database Error: Transaction failed. Rolled back.",e);
+			}finally { 
+				connection.setAutoCommit(true);
+			
+			}
+		}catch (SQLException e) {
+            throw new EmployeeDaoException("DB Error: " + e.getMessage(), e);
+		}
 	}
 }	
   
