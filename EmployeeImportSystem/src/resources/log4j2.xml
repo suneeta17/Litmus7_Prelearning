@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Appenders>
+
+        <!-- Console Appender -->
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%t] %c{1} - %msg%n" />
+        </Console>
+
+        <!-- Rolling File Appender (Daily + Size-Based) -->
+        <RollingFile name="FileAppender"
+                     fileName="logs/app.log"
+                     filePattern="logs/archive/app-%d{yyyy-MM-dd}-%i.log.gz">
+
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%t] %c{1} - %msg%n" />
+
+            <Policies>
+                <!-- Roll over daily -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <!-- Roll over if size > 10 MB -->
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+
+            <!-- Keep a maximum of 30 rolled files -->
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+        <!-- Error-specific File Appender -->
+        <RollingFile name="ErrorFileAppender"
+                     fileName="logs/error.log"
+                     filePattern="logs/archive/error-%d{yyyy-MM-dd}-%i.log.gz">
+
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%t] %c{1} - %msg%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="15" />
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Application-specific logger -->
+        <Logger name="com.litmus.employeemanagementsystem" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+
+        <!-- Error logger -->
+        <Logger name="ErrorLogger" level="error" additivity="false">
+            <AppenderRef ref="ErrorFileAppender" />
+        </Logger>
+
+        <!-- Root logger (catch-all) -->
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Root>
+
+    </Loggers>
+
+</Configuration>

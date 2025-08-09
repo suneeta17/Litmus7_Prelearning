@@ -7,16 +7,25 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import com.litmus.employeemanagementsystem.constant.SQLConstants;
 import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.exception.EmployeeDaoException;
 import com.litmus.employeemanagementsystem.util.DBConnection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 
 public class EmployeeDAO  {
 	
+	private static final Logger logger = LogManager.getLogger(EmployeeDAO.class);
+
+	
 	//To add employee data to db
 	public boolean saveEmployee(Employee emp) throws  EmployeeDaoException {
+		logger.debug("Attempting to save employee : {},",emp);
 		
 		try(Connection conn = DBConnection.getConnection();
 		PreparedStatement pst = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);){
@@ -31,9 +40,11 @@ public class EmployeeDAO  {
 	    pst.setDate(8, emp.getJoinDate());
 	    
 	    int rowsInserted = pst.executeUpdate();
+	    logger.info("Employee {} saved successfully. Rows inserted: {}", emp.getEmployeeId(), rowsInserted);
 	    return rowsInserted > 0;
 		}
 		catch (SQLException e) {
+			logger.error("Error saving employee {}: {}", emp.getEmployeeId(), e.getMessage(), e);
 			throw new EmployeeDaoException("Database error while saveing employee into Database", e);
 		}
 	    	
@@ -41,15 +52,18 @@ public class EmployeeDAO  {
 	
 	//To check Employee exist or not
 	public boolean isEmployeeIDExist(String employeeId) throws  EmployeeDaoException  {
-		
+		logger.debug("Cheching if employee id exist : {}", employeeId);
 		try (Connection conn = DBConnection.getConnection();
 		PreparedStatement pst = conn.prepareStatement(SQLConstants.CHECK_EMPLOYEE_ID_EXISTS);){
 		
 		pst.setString(1,employeeId);
 		ResultSet rs = pst.executeQuery();
+		boolean exists= rs.next();
+		logger.info("Employee ID {} exist ? {}",employeeId , exists);
+		return exists; }
 		
-		return rs.next();}
 		catch(SQLException e) {
+			logger.error("Error checking employee ID{}", employeeId,e);
 			throw new EmployeeDaoException("Database error." ,e);
 
 		}
@@ -57,6 +71,7 @@ public class EmployeeDAO  {
 	
 	//To get all employees
 	public List<Employee> getAllEmployees() throws  EmployeeDaoException {
+		logger.debug("Fetching all employees from database.");
 		List<Employee> employees = new ArrayList<>();
 		
 
@@ -78,8 +93,11 @@ public class EmployeeDAO  {
                 employees.add(employee);
             
             }
+            
+            logger.info("Fetched {} employees from database", employees.size());
 
 	    } catch (SQLException e) {
+	    	logger.error("Database error while fetching employees from database",e);
 	        throw new EmployeeDaoException("Database error while fetching employee data from Database",e);
 	    }
 
@@ -87,12 +105,14 @@ public class EmployeeDAO  {
 	}
 	
 	//DAO method to get Employee by ID
-	public static Employee getEmployeeById(String EmployeeId) throws EmployeeDaoException {
+	public static Employee getEmployeeById(String employeeId) throws EmployeeDaoException {
+		logger.debug("Fetching employee details by ID ", employeeId);
+		
 		Employee employee = null;
 		try (Connection connection = DBConnection.getConnection();
 			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.GET_EMPLOYEE_BY_ID);){
 			
-			pstmt.setString(1, EmployeeId);
+			pstmt.setString(1, employeeId);
 			ResultSet resultSet = pstmt.executeQuery();
 			
 			if (resultSet.next()){	
@@ -105,15 +125,22 @@ public class EmployeeDAO  {
                 employee.setDepartment(resultSet.getString(SQLConstants.COLUMN_DEPARTMENT));
                 employee.setSalary(resultSet.getDouble(SQLConstants.COLUMN_SALARY));
                 employee.setJoinDate(resultSet.getDate(SQLConstants.COLUMN_JOIN_DATE)); 	
-			}	
+                logger.info("Employee Found : {}" , employeeId);
+			}else {
+				logger.warn("No employee found with ID: {}",employeeId);
+			}
+			
+			
 		}catch(SQLException e) {
-			e.printStackTrace();
+			logger.error("Database error fetching employee by ID {} ",employeeId,e);
 			throw new EmployeeDaoException("Database error while fetching employee data from Database",e);
 		}return employee;
 	}
 	
 	//Method to Update employee details
 	public boolean updateEmployee(Employee employee) throws EmployeeDaoException {
+		logger.debug("Updating employee: {}" , employee.getEmployeeId());
+		
 		try(Connection connection = DBConnection.getConnection();
 			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.UPDATE_EMPLOYEE);){
 			
@@ -127,9 +154,11 @@ public class EmployeeDAO  {
 		    pstmt.setString(8, employee.getEmployeeId());
 		    
 		    int rowsUpdated = pstmt.executeUpdate();
+		    logger.info("Updated {} rows for employee {}", rowsUpdated, employee.getEmployeeId());
 		    return rowsUpdated > 0;
 			}
 			catch (SQLException e) {
+				logger.error("Error updating employee {}", employee.getEmployeeId(), e);
 				throw new EmployeeDaoException("Database error while saveing employee into Database", e);
 			}
 			
@@ -137,6 +166,7 @@ public class EmployeeDAO  {
 	
 	//DAO method to delete employee by ID
 	public boolean deleteEmployeeById(String employeeId) throws EmployeeDaoException {
+		logger.debug("Deleting employee with ID: {}", employeeId);
 		int rowsDeleted;
 		boolean result = false;
 		
@@ -146,8 +176,14 @@ public class EmployeeDAO  {
 				
 			rowsDeleted = pstmt.executeUpdate();
 			 
-			if (rowsDeleted > 0)  result = true;;
+			if (rowsDeleted > 0) {
+				logger.info("Deleted employee with ID: {}", employeeId);
+                result = true;
+            } else {
+                logger.warn("No employee found to delete with ID: {}", employeeId);
+            }
 		}catch (SQLException e) {
+			logger.error("Error deleting employee {}", employeeId, e);
 			throw new EmployeeDaoException("Database error could not delete employee with  ID " + employeeId , e);
 		}
 		return result;
@@ -156,6 +192,7 @@ public class EmployeeDAO  {
 	
 	//DAO method to add employees in batch
 	public int[] addEmployeesInBatch(List<Employee> employees) throws EmployeeDaoException {
+		logger.debug("Adding {} employees in batch", employees.size());
 		
 		try(Connection connection = DBConnection.getConnection();
 			PreparedStatement pstmt = connection.prepareStatement(SQLConstants.INSERT_EMPLOYEE);){
@@ -173,15 +210,19 @@ public class EmployeeDAO  {
 			}
 			
 			int[] rowsAffected = pstmt.executeBatch();
+			logger.info("Batch insert completed. {} employees added.", rowsAffected.length);
 			return rowsAffected ;
 			
 		}catch(SQLException e) {
+			logger.error("Error adding employees in batch", e);
 			throw new EmployeeDaoException("Database Error: Failed to process employee batches",e);
 		}
 		
 	}
 	
 	public int[] transferEmployeesToDepartment(List<String> employeeIds,String newDepartment) throws EmployeeDaoException {
+		logger.debug("Transferring {} employees to department: {}", employeeIds.size(), newDepartment);
+		
 		try(Connection connection = DBConnection.getConnection();){
 			connection.setAutoCommit(false);
 			try(PreparedStatement pstmt = connection.prepareStatement(SQLConstants.UPDATE_DEPARTMENT_GIVEN_ID);){
@@ -193,15 +234,19 @@ public class EmployeeDAO  {
 			}	
 			int[] rowsAffected = pstmt.executeBatch();
 			connection.commit();
+			logger.info("Transferred {} employees to department {}", rowsAffected.length, newDepartment);
 			return rowsAffected ;
+			
 			}catch(SQLException e) {
 				connection.rollback();
+				logger.error("Transaction failed while transferring employees. Rolled back.", e);
 				throw new EmployeeDaoException("Database Error: Transaction failed. Rolled back.",e);
 			}finally { 
 				connection.setAutoCommit(true);
 			
 			}
 		}catch (SQLException e) {
+			logger.error("DB connection error during employee transfer", e);
             throw new EmployeeDaoException("DB Error: " + e.getMessage(), e);
 		}
 	}

@@ -6,10 +6,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import com.litmus.employeemanagementsystem.controller.EmployeeManagerController;
-import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.dto.Response;
 
 public class EmployeeManagerClient {
