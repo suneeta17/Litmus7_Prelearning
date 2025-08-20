@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.litmus7.retailStoreInventoryManagement.dto.Product;
 import com.litmus7.retailStoreInventoryManagement.dto.Response;
+import com.litmus7.retailStoreInventoryManagement.exceptions.ProductServiceException;
 import com.litmus7.retailStoreInventoryManagement.service.RetailInventoryManagementService;
 
 public class RetailInventoryManagementController {
@@ -12,26 +13,45 @@ public class RetailInventoryManagementController {
 	
 	public Response<String> addProduct(Product product){
 		
-		retailManagerService.addProduct(product);
-		return null;	
+		try {
+			retailManagerService.addProduct(product);
+			return new Response<>(200,"Product added successfully");
+		} catch (ProductServiceException e) {
+			return new Response<>(500,"Failed to add Products");	
+		}
+			
 	}
 	
 	public Response<List<Product>> getAllProducts(){
 			
-		retailManagerService.getAllProducts();
-		return null;
+		try {
+			List<Product> products=retailManagerService.getAllProducts();
+			return new Response<>(200,"Product fetched successfully",products);
+		} catch (ProductServiceException e) {
+			return new Response<>(500,"Failed to fetch products ");
+		}
+		
 	}
 	
 	public Response<List<Product>> getProductsByCategory(String category){
 		
-		retailManagerService.getProductsByCategory(category);
-		return null;	
+		try {
+			List<Product> products=retailManagerService.getProductsByCategory(category);
+			return new Response<>(200,"Product fetched successfully",products);
+		} catch (ProductServiceException e) {
+			return new Response<>(500,"Faled to fetch products from : " + category);
+		}
 	}
 	
 	public Response<List<Product>> sortProduct(String sortOption){
 		
-		retailManagerService.sortProducts(sortOption);
-		return null;
+		try {
+			List<Product> sortedProducts =retailManagerService.sortProducts(sortOption);
+			return new Response<>(200,"Product Sorted successfully",sortedProducts);
+		} catch (ProductServiceException e) {
+			return new Response<>(500,"Sort Operation Failed");
+		}
+		
 	}
 
 }
