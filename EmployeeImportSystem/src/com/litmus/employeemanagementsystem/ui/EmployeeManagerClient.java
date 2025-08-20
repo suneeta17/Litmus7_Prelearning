@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import com.litmus.employeemanagementsystem.controller.EmployeeManagerController;
+import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.dto.Response;
 
 public class EmployeeManagerClient {
@@ -14,7 +15,7 @@ public class EmployeeManagerClient {
     public static void main(String[] args) throws ParseException, IOException, SQLException {
         
 		EmployeeManagerController controller = new EmployeeManagerController();
-		/*String filePath = "C:\\Users\\sunee\\eclipse-workspace\\Litmus PreLearning\\data\\employee_data.csv";
+		String filePath = "C:\\Users\\sunee\\eclipse-workspace\\Litmus PreLearning\\data\\employee_data.csv";
 	
 	
 		Response<String> response = controller.importEmployeeData(filePath);
@@ -106,7 +107,7 @@ public class EmployeeManagerClient {
 
     	 System.out.println("\n=== Add Employee Operation ===");
     	 System.out.println("Status Code: " + addResponse.getStatusCode());
-    	 System.out.println(addResponse.getMessage());*/
+    	 System.out.println(addResponse.getMessage());
     	 
 		
 		// --- Add Multiple Employees in Batch ---

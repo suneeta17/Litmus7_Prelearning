@@ -5,6 +5,7 @@ import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.exception.EmployeeDaoException;
 import com.litmus.employeemanagementsystem.exception.EmployeeServiceException;
 import com.litmus.employeemanagementsystem.util.CSVReader;
+import com.litmus.employeemanagementsystem.util.ErrorCodeUtil;
 import com.litmus.employeemanagementsystem.util.ValidationUtility;
 
 
@@ -42,7 +43,7 @@ public class EmployeeManagerService {
         logger.info("Loaded {} rows from CSV file", rows.size());
         }catch(IOException e) {
         	logger.error("Error reading CSV file: {}", filePath, e);
-        	throw new EmployeeServiceException("Service error while reading CSV file",e);
+        	throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-100", filePath),e);
         	
         }
         List<Employee> validEmployees = new ArrayList<>();
@@ -53,13 +54,13 @@ public class EmployeeManagerService {
             String error = validate(row);
             if (error != null) {
             	logger.warn("Validation failed for row {}: {}", Arrays.toString(row), error);
-                result.get("error").add("Invalid: " + Arrays.toString(row) + " | Reason: " + error);
+                result.get("error").add(ErrorCodeUtil.getErrorMessage("EMP-SERV-101", Arrays.toString(row), error));
             } else {
                 validEmployees.add(new Employee(row));
             }
 		}}catch (ParseException e) {
 			logger.error("Parsing error during validation", e);
-			throw new EmployeeServiceException("Server error while parsing data",e);
+			throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-102"),e);
 			
 		}
         
@@ -71,17 +72,17 @@ public class EmployeeManagerService {
             	logger.debug("Checking if employee ID {} exists", employeeId);
             	if (employeeDAO.isEmployeeIDExist(employeeId)) {
                     logger.info("Duplicate Employee ID found: {}", employeeId);
-                    result.get("error").add("Duplicate Employee ID: " + employeeId);
+                    result.get("error").add( ErrorCodeUtil.getErrorMessage("EMP-SERV-103", employeeId));
                 } else if (employeeDAO.saveEmployee(emp)) {
                     logger.info("Inserted employee: {}", employeeId);
-                    result.get("success").add("Inserted: " + employeeId);
+                    result.get("success").add( ErrorCodeUtil.getErrorMessage("EMP-SERV-104", employeeId));
                 } else {
                     logger.warn("Failed to insert employee: {}", employeeId);
-                    result.get("error").add("Failed to insert: " + employeeId);
+                    result.get("error").add( ErrorCodeUtil.getErrorMessage("EMP-SERV-105", employeeId));
                 }
             }catch (EmployeeDaoException e) {
             	logger.error("DAO error while saving employee {}", employeeId, e);
-            	throw new EmployeeServiceException("DAO error while processing and importing employye data",e);
+            	throw new EmployeeServiceException( ErrorCodeUtil.getErrorMessage("EMP-SERV-106", employeeId),e);
             }
         }
 
@@ -96,7 +97,7 @@ public class EmployeeManagerService {
         	return employeeDAO.getAllEmployees();
         }catch (EmployeeDaoException e) {
         	logger.error("Error fetching all employees", e);
-        	throw new EmployeeServiceException("Server failed to fetch employees",e);
+        	throw new EmployeeServiceException( ErrorCodeUtil.getErrorMessage("EMP-SERV-200"),e);
         }
     }
     
@@ -107,7 +108,7 @@ public class EmployeeManagerService {
 				return EmployeeDAO.getEmployeeById(employeeId);
 			} catch  (EmployeeDaoException e) {
 				logger.error("Error fetching employee with ID {}", employeeId, e);
-	    		throw new EmployeeServiceException("Server failed tp fetch employee with ID "+ employeeId, e);
+	    		throw new EmployeeServiceException( ErrorCodeUtil.getErrorMessage("EMP-SERV-201", employeeId), e);
 			}
     }
     
@@ -137,10 +138,10 @@ public class EmployeeManagerService {
 
         } catch (EmployeeDaoException e) {
         	logger.error("Error adding new employee", e);
-            throw new EmployeeServiceException("Error adding  new employee: " + e.getMessage(), e);
+            throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-202"), e);
         } catch (ParseException e) {
         	logger.error("Error while parsing employee data", e);
-            throw new EmployeeServiceException("Error parsing employee data: " + e.getMessage(), e);
+            throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-203"), e);
         }
     }
        
@@ -171,10 +172,10 @@ public class EmployeeManagerService {
 
         } catch (EmployeeDaoException e) {
         	logger.error("Error updating employee", e);
-            throw new EmployeeServiceException("Error updating employee: " + e.getMessage(), e);
+            throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-204"), e);
         } catch (ParseException e) {
         	logger.error("Error parsing employee data", e);
-            throw new EmployeeServiceException("Error parsing employee data: " + e.getMessage(), e);
+            throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-205"), e);
         }
     }
     
@@ -187,7 +188,7 @@ public class EmployeeManagerService {
              return deleted;
          } catch (EmployeeDaoException e) {
              logger.error("Error deleting employee with ID {}", employeeId, e);
-             throw new EmployeeServiceException("Server Failed to delete Employee with ID " + employeeId, e);
+             throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-206", employeeId), e);
          }
      }
     
@@ -206,21 +207,21 @@ public class EmployeeManagerService {
 				        String error = validate(employee);
 				        if (error != null) {
 				        	logger.warn("Validation failed for employee ID {}: {}", employeeId, error);
-				            errors.add("Invalid: " + Arrays.toString(employee) + " | Reason: " + error);
+				            errors.add(ErrorCodeUtil.getErrorMessage("EMP-SERV-207", employeeId, error));
 				        } else {
 				        	logger.debug("Validation passed for employee ID: {}", employeeId);
 				            validEmployees.add(new Employee(employee));
 				        }
 				    } catch (ParseException e) {
 				    	logger.error("Error parsing data for employee ID {}: {}", employeeId, e.getMessage(), e);
-				        throw new EmployeeServiceException("Server error while parsing data: " + Arrays.toString(employee), e); 
+				        throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-2078", employeeId), e); 
 				}}
 				else {
 	                logger.warn("Duplicate employee ID found: {}", employeeId);
 	            }
 			} catch (EmployeeDaoException e) {
 				logger.error("DAO error while checking employee ID {}: {}", employeeId, e.getMessage(), e);
-				throw new EmployeeServiceException("Server error Something went wrong " + Arrays.toString(employee), e); 
+				throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-209", employeeId), e); 
 			}
         }
 
@@ -232,7 +233,7 @@ public class EmployeeManagerService {
                 logger.debug("Batch insert status: {}", Arrays.toString(insertStatus));
             } catch (EmployeeDaoException e) {
                 logger.error("DAO error during batch insert: {}", e.getMessage(), e);
-                throw new EmployeeServiceException("Server error while processing batch insert: ", e);
+                throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-210"), e);
             }
         } else {
             logger.warn("No valid employees found for batch insert");
@@ -265,7 +266,7 @@ public class EmployeeManagerService {
                     }
                 } catch (EmployeeDaoException e) {
                     logger.error("DAO error while checking employee ID {}: {}", employeeId, e.getMessage(), e);
-                    throw new EmployeeServiceException("Server Error: Something went wrong ", e);
+                    throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-211",employeeId), e);
                 }
             } else {
                 logger.warn("Invalid employee ID format: {}", employeeId);
@@ -278,7 +279,7 @@ public class EmployeeManagerService {
             logger.debug("Department transfer status: {}", Arrays.toString(updateDepartmentStatus));
         } catch (EmployeeDaoException e) {
             logger.error("DAO error during department transfer: {}", e.getMessage(), e);
-            throw new EmployeeServiceException("Server Error: Could not update Department ", e);
+            throw new EmployeeServiceException(ErrorCodeUtil.getErrorMessage("EMP-SERV-212", newDepartment), e);
         }
 
         logger.info("Department transfer completed for {} employees", validEmployeeIds.size());
@@ -290,20 +291,19 @@ public class EmployeeManagerService {
     private String validate(String[] data) throws ParseException  {
     	logger.debug("Validating employee data: {}", Arrays.toString(data));
         String[] fields = {"Employee ID", "First Name", "Last Name", "Email", "Phone", "Department", "Salary", "Join Date"};
-        if (data.length != fields.length) return "Expected " + fields.length + " fields, got " + data.length;
+        if (data.length != fields.length) return   ErrorCodeUtil.getErrorMessage("EMP-SERV-300", data.length);
 
         for (int i = 0; i < data.length; i++) {
             if (!ValidationUtility.isNotNullOrNotEmpty(data[i])) {
-                return fields[i] + " is empty or null.";
+            	return ErrorCodeUtil.getErrorMessage("EMP-SERV-301", fields[i]);
             }
         }
 
         String email = data[3], phone = data[4], salary = data[6], date = data[7];
-        if (!ValidationUtility.isEmailValid(email)) return "Invalid email: " + email;
-        if (!ValidationUtility.isPhoneNumberValid(phone)) return "Invalid phone: " + phone;
-        if (!ValidationUtility.isDoubleValid(salary)) return "Invalid salary: " + salary;
-        if (ValidationUtility.isDateValid(date) == null) return "Invalid date: " + date;
-
+        if (!ValidationUtility.isEmailValid(email)) return ErrorCodeUtil.getErrorMessage("EMP-SERV-302", email);
+        if (!ValidationUtility.isPhoneNumberValid(phone)) return ErrorCodeUtil.getErrorMessage("EMP-SERV-303", phone);
+        if (!ValidationUtility.isDoubleValid(salary)) return ErrorCodeUtil.getErrorMessage("EMP-SERV-304", salary);
+        if (ValidationUtility.isDateValid(date) == null) return ErrorCodeUtil.getErrorMessage("EMP-SERV-305", date);
         return null;
     }
     

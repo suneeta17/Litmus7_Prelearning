@@ -8,7 +8,7 @@ import com.litmus7.retailStoreInventoryManagement.service.RetailInventoryManagem
 
 public class RetailInventoryManagementController {
 	
-	RetailInventoryManagementService retailManagerService = new RetailInventoryManagementService();
+	private RetailInventoryManagementService retailManagerService = new RetailInventoryManagementService();
 	
 	public Response<String> addProduct(Product product){
 		

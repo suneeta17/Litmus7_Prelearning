@@ -13,6 +13,8 @@ import com.litmus.employeemanagementsystem.constant.SQLConstants;
 import com.litmus.employeemanagementsystem.dto.Employee;
 import com.litmus.employeemanagementsystem.exception.EmployeeDaoException;
 import com.litmus.employeemanagementsystem.util.DBConnection;
+import com.litmus.employeemanagementsystem.util.ErrorCodeUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +47,7 @@ public class EmployeeDAO  {
 		}
 		catch (SQLException e) {
 			logger.error("Error saving employee {}: {}", emp.getEmployeeId(), e.getMessage(), e);
-			throw new EmployeeDaoException("Database error while saveing employee into Database", e);
+			throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-500"), e);
 		}
 	    	
 	}
@@ -64,7 +66,7 @@ public class EmployeeDAO  {
 		
 		catch(SQLException e) {
 			logger.error("Error checking employee ID{}", employeeId,e);
-			throw new EmployeeDaoException("Database error." ,e);
+			throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-501", employeeId),e);
 
 		}
 	}
@@ -98,7 +100,7 @@ public class EmployeeDAO  {
 
 	    } catch (SQLException e) {
 	    	logger.error("Database error while fetching employees from database",e);
-	        throw new EmployeeDaoException("Database error while fetching employee data from Database",e);
+	        throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-502"),e);
 	    }
 
 	    return employees; 
@@ -133,7 +135,7 @@ public class EmployeeDAO  {
 			
 		}catch(SQLException e) {
 			logger.error("Database error fetching employee by ID {} ",employeeId,e);
-			throw new EmployeeDaoException("Database error while fetching employee data from Database",e);
+			throw new EmployeeDaoException( ErrorCodeUtil.getErrorMessage("EMP-DB-503", employeeId),e);
 		}return employee;
 	}
 	
@@ -159,7 +161,7 @@ public class EmployeeDAO  {
 			}
 			catch (SQLException e) {
 				logger.error("Error updating employee {}", employee.getEmployeeId(), e);
-				throw new EmployeeDaoException("Database error while saveing employee into Database", e);
+				throw new EmployeeDaoException( ErrorCodeUtil.getErrorMessage("EMP-DB-504", employee.getEmployeeId()), e);
 			}
 			
 		}
@@ -184,7 +186,7 @@ public class EmployeeDAO  {
             }
 		}catch (SQLException e) {
 			logger.error("Error deleting employee {}", employeeId, e);
-			throw new EmployeeDaoException("Database error could not delete employee with  ID " + employeeId , e);
+			throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-505", employeeId), e);
 		}
 		return result;
 		
@@ -215,7 +217,7 @@ public class EmployeeDAO  {
 			
 		}catch(SQLException e) {
 			logger.error("Error adding employees in batch", e);
-			throw new EmployeeDaoException("Database Error: Failed to process employee batches",e);
+			throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-506"),e);
 		}
 		
 	}
@@ -240,14 +242,14 @@ public class EmployeeDAO  {
 			}catch(SQLException e) {
 				connection.rollback();
 				logger.error("Transaction failed while transferring employees. Rolled back.", e);
-				throw new EmployeeDaoException("Database Error: Transaction failed. Rolled back.",e);
+				throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-507"),e);
 			}finally { 
 				connection.setAutoCommit(true);
 			
 			}
 		}catch (SQLException e) {
 			logger.error("DB connection error during employee transfer", e);
-            throw new EmployeeDaoException("DB Error: " + e.getMessage(), e);
+            throw new EmployeeDaoException(ErrorCodeUtil.getErrorMessage("EMP-DB-508"), e);
 		}
 	}
 }	
